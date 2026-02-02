@@ -26,14 +26,12 @@ detect_default_image_dir() {
 
 DEFAULT_IMAGE_DIR=$(detect_default_image_dir)
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Source shared library for colors and CUDA check
+if [ -f /usr/local/lib/runpod_common.sh ]; then
+    source /usr/local/lib/runpod_common.sh
+fi
 
-# Logging functions
+# Logging functions (JoyCaption-specific style)
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -300,55 +298,8 @@ main() {
     # Check Python installation
     check_python
 
-    # CUDA compatibility check
-    check_cuda_compatibility() {
-        $PYTHON_CMD << 'PYTHON_EOF'
-import sys
-try:
-    import torch
-    if torch.cuda.is_available():
-        # Try a simple CUDA operation to test kernel compatibility
-        x = torch.randn(1, device='cuda')
-        y = x * 2
-        print("CUDA compatibility check passed")
-    else:
-        print("\n" + "="*70)
-        print("CUDA NOT AVAILABLE")
-        print("="*70)
-        print("\nCUDA is not available on this system.")
-        print("This script requires CUDA to run.")
-        print("\nSOLUTION:")
-        print("  Please deploy with CUDA 12.8 when selecting your GPU on RunPod")
-        print("  This template requires CUDA 12.8")
-        print("\n" + "="*70)
-        sys.exit(1)
-except RuntimeError as e:
-    error_msg = str(e).lower()
-    if "no kernel image" in error_msg or "cuda error" in error_msg:
-        print("\n" + "="*70)
-        print("CUDA KERNEL COMPATIBILITY ERROR")
-        print("="*70)
-        print("\nThis error occurs when your GPU architecture is not supported")
-        print("by the installed CUDA kernels. This typically happens when:")
-        print("  • Your GPU model is older or different from what was expected")
-        print("  • The PyTorch/CUDA build doesn't include kernels for your GPU")
-        print("\nSOLUTIONS:")
-        print("  1. Use a newer GPU model (recommended):")
-        print("     • H100 or H200 GPUs are recommended for best compatibility")
-        print("  2. Ensure correct CUDA version:")
-        print("     • Filter for CUDA 12.8 when selecting your GPU on RunPod")
-        print("     • This template requires CUDA 12.8")
-        print("\n" + "="*70)
-        sys.exit(1)
-    else:
-        raise
-PYTHON_EOF
-        if [ $? -ne 0 ]; then
-            exit 1
-        fi
-    }
-    
-    check_cuda_compatibility
+    # CUDA compatibility check (uses $PYTHON_CMD from check_python)
+    check_cuda_compatibility "$PYTHON_CMD"
 
     # Create requirements file if needed
     create_requirements

@@ -28,6 +28,9 @@ if [ $? -ne 0 ]; then
     fi
 fi
 
+# Install shared shell library
+cp /tmp/runpod-diffusion_pipe/src/common.sh /usr/local/lib/runpod_common.sh
+
 # Move start.sh to root and execute it
 mv /tmp/runpod-diffusion_pipe/src/start.sh /
 chmod +x /start.sh

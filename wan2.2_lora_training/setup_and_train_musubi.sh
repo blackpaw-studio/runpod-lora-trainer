@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Source shared library
+if [ -f /usr/local/lib/runpod_common.sh ]; then
+    source /usr/local/lib/runpod_common.sh
+else
+    echo "ERROR: /usr/local/lib/runpod_common.sh not found. Was start_script.sh run first?"
+    exit 1
+fi
+
 ########################################
 # GPU detection
 ########################################
-gpu_count() {
-  if command -v nvidia-smi >/dev/null 2>&1; then
-    nvidia-smi -L 2>/dev/null | wc -l | awk '{print $1}'
-  elif [ -n "${CUDA_VISIBLE_DEVICES-}" ] && [ "${CUDA_VISIBLE_DEVICES-}" != "" ]; then
-    echo "${CUDA_VISIBLE_DEVICES}" | awk -F',' '{print NF}'
-  else
-    echo 0
-  fi
-}
 GPU_COUNT=$(gpu_count)
 echo ">>> Detected GPUs: ${GPU_COUNT}"
 if [ "${GPU_COUNT}" -lt 1 ]; then
@@ -20,89 +19,7 @@ if [ "${GPU_COUNT}" -lt 1 ]; then
   exit 1
 fi
 
-########################################
-# Blackwell GPU warning
-########################################
-RED='\033[0;31m'
-BOLD='\033[1m'
-NC='\033[0m'
-
-if [ -f /tmp/gpu_arch_type ]; then
-    GPU_ARCH_TYPE=$(cat /tmp/gpu_arch_type)
-    DETECTED_GPU=$(cat /tmp/detected_gpu 2>/dev/null || echo "Unknown")
-    if [ "$GPU_ARCH_TYPE" = "blackwell" ]; then
-        echo ""
-        echo -e "${BOLD}${RED}════════════════════════════════════════════════════════════════${NC}"
-        echo -e "${BOLD}${RED}⚠️  WARNING: BLACKWELL GPU DETECTED ⚠️${NC}"
-        echo -e "${BOLD}${RED}════════════════════════════════════════════════════════════════${NC}"
-        echo -e "${BOLD}${RED}Detected GPU: $DETECTED_GPU${NC}"
-        echo -e "${BOLD}${RED}${NC}"
-        echo -e "${BOLD}${RED}Blackwell GPUs (B100, B200, RTX 5090, etc.) are very new and${NC}"
-        echo -e "${BOLD}${RED}may not be fully supported by all ML libraries yet.${NC}"
-        echo -e "${BOLD}${RED}${NC}"
-        echo -e "${BOLD}${RED}For best compatibility, use H100 or H200 GPUs.${NC}"
-        echo -e "${BOLD}${RED}════════════════════════════════════════════════════════════════${NC}"
-        echo ""
-        echo -n "Continuing in "
-        for i in 10 9 8 7 6 5 4 3 2 1; do
-            echo -n "$i.."
-            sleep 1
-        done
-        echo ""
-        echo ""
-    fi
-fi
-
-########################################
-# CUDA compatibility check
-########################################
-check_cuda_compatibility() {
-    python3 << 'PYTHON_EOF'
-import sys
-try:
-    import torch
-    if torch.cuda.is_available():
-        # Try a simple CUDA operation to test kernel compatibility
-        x = torch.randn(1, device='cuda')
-        y = x * 2
-        print("CUDA compatibility check passed")
-    else:
-        print("\n" + "="*70)
-        print("CUDA NOT AVAILABLE")
-        print("="*70)
-        print("\nCUDA is not available on this system.")
-        print("This script requires CUDA to run.")
-        print("\nSOLUTION:")
-        print("  Please deploy with CUDA 12.8 when selecting your GPU on RunPod")
-        print("  This template requires CUDA 12.8")
-        print("\n" + "="*70)
-        sys.exit(1)
-except RuntimeError as e:
-    error_msg = str(e).lower()
-    if "no kernel image" in error_msg or "cuda error" in error_msg:
-        print("\n" + "="*70)
-        print("CUDA KERNEL COMPATIBILITY ERROR")
-        print("="*70)
-        print("\nThis error occurs when your GPU architecture is not supported")
-        print("by the installed CUDA kernels. This typically happens when:")
-        print("  • Your GPU model is older or different from what was expected")
-        print("  • The PyTorch/CUDA build doesn't include kernels for your GPU")
-        print("\nSOLUTIONS:")
-        print("  1. Use a newer GPU model (recommended):")
-        print("     • H100 or H200 GPUs are recommended for best compatibility")
-        print("  2. Ensure correct CUDA version:")
-        print("     • Filter for CUDA 12.8 when selecting your GPU on RunPod")
-        print("     • This template requires CUDA 12.8")
-        print("\n" + "="*70)
-        sys.exit(1)
-    else:
-        raise
-PYTHON_EOF
-    if [ $? -ne 0 ]; then
-        exit 1
-    fi
-}
-
+warn_blackwell_gpu
 check_cuda_compatibility
 
 ########################################
@@ -118,18 +35,8 @@ fi
 source "$CONFIG_FILE"
 
 ########################################
-# Helpers for numeric CSV -> TOML arrays
+# Normalize config lists
 ########################################
-normalize_numeric_csv() {
-  # Input: "720, 896, 1152" or "[720, 896, 1152]" or '"720, 896, 1152"'
-  # Output: "720, 896, 1152"
-  local s="$1"
-  s="$(echo "$s" | tr -d '[]"' )"
-  # collapse spaces around commas; trim leading/trailing spaces
-  s="$(echo "$s" | sed -E 's/[[:space:]]*,[[:space:]]*/, /g; s/^[[:space:]]+|[[:space:]]+$//g')"
-  echo "$s"
-}
-
 # Normalize lists (with defaults if not set)
 RESOLUTION_LIST_NORM="$(normalize_numeric_csv "${RESOLUTION_LIST:-"720, 896, 1152"}")"
 TARGET_FRAMES_NORM="$(normalize_numeric_csv "${TARGET_FRAMES:-"1, 57, 117"}")"
@@ -310,9 +217,6 @@ fi
 ########################################
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True,max_split_size_mb:512
 
-########################################
-# ANSI colors for output
-########################################
 C_RESET="\033[0m"
 C_HIGH="\033[38;5;40m"   # green
 C_LOW="\033[38;5;214m"   # orange
