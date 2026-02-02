@@ -9,6 +9,16 @@ else
     exit 1
 fi
 
+# Cleanup background processes on interrupt
+BACKGROUND_PIDS=()
+cleanup() {
+    for pid in "${BACKGROUND_PIDS[@]}"; do
+        kill "$pid" 2>/dev/null || true
+    done
+    exit 1
+}
+trap cleanup SIGINT SIGTERM
+
 # Welcome message
 clear
 print_header "Welcome to HearmemanAI LoRA Trainer using Diffusion Pipe"
@@ -356,6 +366,7 @@ case $MODEL_TYPE in
         mkdir -p "$NETWORK_VOLUME/models/flux"
         hf download black-forest-labs/FLUX.1-dev --local-dir "$NETWORK_VOLUME/models/flux" --repo-type model --token "$HUGGING_FACE_TOKEN" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
         ;;
 
     "sdxl")
@@ -379,6 +390,7 @@ case $MODEL_TYPE in
         print_info "Starting Base SDXL model download in background..."
         hf download timoshishi/sdXL_v10VAEFix sdXL_v10VAEFix.safetensors --local-dir "$NETWORK_VOLUME/models/" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
         ;;
 
     "wan13")
@@ -403,6 +415,7 @@ case $MODEL_TYPE in
         mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B"
         hf download Wan-AI/Wan2.1-T2V-1.3B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
         ;;
 
     "wan14b_t2v")
@@ -427,6 +440,7 @@ case $MODEL_TYPE in
         mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B"
         hf download Wan-AI/Wan2.1-T2V-14B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
         ;;
 
     "wan14b_i2v")
@@ -451,6 +465,7 @@ case $MODEL_TYPE in
         mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P"
         hf download Wan-AI/Wan2.1-I2V-14B-480P --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
         ;;
 
     "qwen")
@@ -475,6 +490,7 @@ case $MODEL_TYPE in
         mkdir -p "$NETWORK_VOLUME/models/Qwen-Image"
         hf download Qwen/Qwen-Image --local-dir "$NETWORK_VOLUME/models/Qwen-Image" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
         ;;
 
     "z_image_turbo")
@@ -519,6 +535,7 @@ case $MODEL_TYPE in
             echo "Z Image Turbo model download complete!"
         ) > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
         ;;
 esac
 
@@ -558,6 +575,7 @@ if [ "$CAPTION_MODE" != "skip" ]; then
                 bash "$JOY_CAPTION_SCRIPT" > "$NETWORK_VOLUME/logs/image_captioning.log" 2>&1 &
             fi
             IMAGE_CAPTION_PID=$!
+            BACKGROUND_PIDS+=("$!")
             print_success "Image captioning started in background (PID: $IMAGE_CAPTION_PID)"
 
             # Wait for image captioning with progress indicator
@@ -605,6 +623,7 @@ if [ "$CAPTION_MODE" != "skip" ]; then
         if [ -f "$VIDEO_CAPTION_SCRIPT" ]; then
             bash "$VIDEO_CAPTION_SCRIPT" > "$NETWORK_VOLUME/logs/video_captioning.log" 2>&1 &
             VIDEO_CAPTION_PID=$!
+            BACKGROUND_PIDS+=("$!")
 
             # Wait for video captioning with progress indicator
             print_info "Waiting for video captioning to complete..."

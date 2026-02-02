@@ -195,6 +195,7 @@ if [ "$WHEEL_INSTALLED" = false ]; then
     echo "$FLASH_ATTN_PID" > /tmp/flash_attn_pid
     echo "flash-attn build started in background (PID: $FLASH_ATTN_PID)"
     echo "To monitor progress: tail -f $NETWORK_VOLUME/logs/flash_attn_install.log"
+    trap 'kill "$FLASH_ATTN_PID" 2>/dev/null || true' SIGINT SIGTERM
 fi
 
 # Start Jupyter Lab with the working folder as the root directory
@@ -326,4 +327,6 @@ echo "================================================"
 echo "✅ Jupyter Lab is running and accessible via the web interface"
 echo "================================================"
 
-sleep infinity
+trap 'kill 0' SIGTERM
+sleep infinity &
+wait
