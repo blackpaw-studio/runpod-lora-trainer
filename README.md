@@ -49,3 +49,7 @@ Before running the script, place your training data in:
 ## Need Help?
 
 The interactive script provides clear instructions and error messages to guide you through each step. Simply follow the on-screen prompts!
+
+## Credits
+
+This project is a fork of [runpod-diffusion_pipe](https://github.com/Hearmeman24/runpod-diffusion_pipe) by [Hearmeman24](https://github.com/Hearmeman24). Thank you for the original work that made this possible.
