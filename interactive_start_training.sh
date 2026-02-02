@@ -585,34 +585,12 @@ if [ "$CAPTION_MODE" != "skip" ]; then
             BACKGROUND_PIDS+=("$!")
             print_success "Image captioning started in background (PID: $IMAGE_CAPTION_PID)"
 
-            # Wait for image captioning with progress indicator
-            print_info "Waiting for image captioning to complete..., initial run can take 5-20 minutes."
-            timeout_counter=0
-            max_timeout=3600  # 1 hour timeout
-            while kill -0 "$IMAGE_CAPTION_PID" 2>/dev/null; do
-                # Check for completion first
-                if tail -n 1 "$NETWORK_VOLUME/logs/image_captioning.log" 2>/dev/null | grep -q "All done!"; then
-                    break
-                fi
-                # Check for actual errors (more specific patterns to avoid false positives)
-                # Look for actual error patterns: [ERROR], Error:, Traceback, Exception:, or failed with exit code
-                if tail -n 20 "$NETWORK_VOLUME/logs/image_captioning.log" 2>/dev/null | grep -qiE "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)"; then
-                    print_error "Image captioning encountered errors. Check log: $NETWORK_VOLUME/logs/image_captioning.log"
-                    exit 1
-                fi
-                echo -n "."
-                sleep 2
-                timeout_counter=$((timeout_counter + 2))
-                if [ $timeout_counter -ge $max_timeout ]; then
-                    print_error "Image captioning timed out after 1 hour. Check log: $NETWORK_VOLUME/logs/image_captioning.log"
-                    exit 1
-                fi
-            done
-            echo ""
-            # Verify captioning actually completed successfully
-            wait "$IMAGE_CAPTION_PID"
-            if [ $? -ne 0 ]; then
-                print_error "Image captioning failed. Check log: $NETWORK_VOLUME/logs/image_captioning.log"
+            # Wait for image captioning with live log output
+            print_info "Waiting for image captioning to complete... initial run can take 5-20 minutes."
+            if ! wait_with_log "$IMAGE_CAPTION_PID" "$NETWORK_VOLUME/logs/image_captioning.log" \
+                    "Image captioning" 3600 \
+                    "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)" \
+                    "All done!"; then
                 exit 1
             fi
             print_success "Image captioning completed!"
@@ -632,38 +610,15 @@ if [ "$CAPTION_MODE" != "skip" ]; then
             VIDEO_CAPTION_PID=$!
             BACKGROUND_PIDS+=("$!")
 
-            # Wait for video captioning with progress indicator
+            # Wait for video captioning with live log output
             print_info "Waiting for video captioning to complete..."
-            timeout_counter=0
-            max_timeout=7200  # 2 hour timeout (videos take longer)
-            while kill -0 "$VIDEO_CAPTION_PID" 2>/dev/null; do
-                # Check for completion first
-                if tail -n 1 "$NETWORK_VOLUME/logs/video_captioning.log" 2>/dev/null | grep -q "video captioning complete"; then
-                    break
-                fi
-                # Check for actual errors (more specific patterns to avoid false positives)
-                # Look for actual error patterns: [ERROR], Error:, Traceback, Exception:, or failed with exit code
-                if tail -n 20 "$NETWORK_VOLUME/logs/video_captioning.log" 2>/dev/null | grep -qiE "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)"; then
-                    print_error "Video captioning encountered errors. Check log: $NETWORK_VOLUME/logs/video_captioning.log"
-                    exit 1
-                fi
-                echo -n "."
-                sleep 2
-                timeout_counter=$((timeout_counter + 2))
-                if [ $timeout_counter -ge $max_timeout ]; then
-                    print_error "Video captioning timed out after 2 hours. Check log: $NETWORK_VOLUME/logs/video_captioning.log"
-                    exit 1
-                fi
-            done
-            echo ""
-
-            wait "$VIDEO_CAPTION_PID"
-            if [ $? -eq 0 ]; then
-                print_success "Video captioning completed successfully"
-            else
-                print_error "Video captioning failed. Check log: $NETWORK_VOLUME/logs/video_captioning.log"
+            if ! wait_with_log "$VIDEO_CAPTION_PID" "$NETWORK_VOLUME/logs/video_captioning.log" \
+                    "Video captioning" 7200 \
+                    "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)" \
+                    "video captioning complete"; then
                 exit 1
             fi
+            print_success "Video captioning completed successfully"
         else
             print_error "Video captioning script not found at: $VIDEO_CAPTION_SCRIPT"
             exit 1
@@ -678,33 +633,9 @@ if [ -n "$MODEL_DOWNLOAD_PID" ]; then
     print_header "Finalizing Model Download"
     echo ""
     print_info "Waiting for model download to complete..."
-    print_info "To view model download progress, open a new terminal window and paste:"
-    echo "  tail -f $NETWORK_VOLUME/logs/model_download.log"
     echo ""
-    timeout_counter=0
-    max_timeout=10800  # 3 hour timeout for large models
-    while kill -0 "$MODEL_DOWNLOAD_PID" 2>/dev/null; do
-        # Check for errors in log
-        if tail -n 20 "$NETWORK_VOLUME/logs/model_download.log" 2>/dev/null | grep -qi "error\|failed\|exception\|unauthorized\|403\|404"; then
-            print_error "Model download encountered errors. Check log: $NETWORK_VOLUME/logs/model_download.log"
-            kill "$MODEL_DOWNLOAD_PID" 2>/dev/null || true
-            exit 1
-        fi
-        echo -n "."
-        sleep 3
-        timeout_counter=$((timeout_counter + 3))
-        if [ $timeout_counter -ge $max_timeout ]; then
-            print_error "Model download timed out after 3 hours. Check log: $NETWORK_VOLUME/logs/model_download.log"
-            kill "$MODEL_DOWNLOAD_PID" 2>/dev/null || true
-            exit 1
-        fi
-    done
-    echo ""
-    wait "$MODEL_DOWNLOAD_PID"
-    download_exit_code=$?
-    
-    if [ $download_exit_code -ne 0 ]; then
-        print_error "Model download failed with exit code $download_exit_code. Check log: $NETWORK_VOLUME/logs/model_download.log"
+    if ! wait_with_log "$MODEL_DOWNLOAD_PID" "$NETWORK_VOLUME/logs/model_download.log" \
+            "Model download" 10800 "error|failed|exception|unauthorized|403|404"; then
         exit 1
     fi
     

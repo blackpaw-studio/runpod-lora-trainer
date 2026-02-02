@@ -144,6 +144,58 @@ normalize_numeric_csv() {
 }
 
 ########################################
+# Wait for a background process while streaming its log
+########################################
+# Usage: wait_with_log PID LOG_FILE LABEL TIMEOUT_SECONDS [ERROR_PATTERN] [DONE_PATTERN]
+wait_with_log() {
+    local pid="$1" log_file="$2" label="$3" max_timeout="${4:-10800}"
+    local error_pattern="${5:-}"
+    local done_pattern="${6:-}"
+    local timeout_counter=0 tail_pid
+
+    # Stream the log to the user in real time
+    touch "$log_file"
+    tail -f "$log_file" 2>/dev/null &
+    tail_pid=$!
+
+    while kill -0 "$pid" 2>/dev/null; do
+        # Check for early completion marker
+        if [ -n "$done_pattern" ]; then
+            if tail -n 1 "$log_file" 2>/dev/null | grep -q "$done_pattern"; then
+                break
+            fi
+        fi
+        # Check for errors
+        if [ -n "$error_pattern" ]; then
+            if tail -n 20 "$log_file" 2>/dev/null | grep -qiE "$error_pattern"; then
+                kill "$tail_pid" 2>/dev/null || true
+                wait "$tail_pid" 2>/dev/null || true
+                print_error "$label encountered errors. Check log: $log_file"
+                kill "$pid" 2>/dev/null || true
+                return 1
+            fi
+        fi
+        sleep 3
+        timeout_counter=$((timeout_counter + 3))
+        if [ "$timeout_counter" -ge "$max_timeout" ]; then
+            kill "$tail_pid" 2>/dev/null || true
+            wait "$tail_pid" 2>/dev/null || true
+            print_error "$label timed out. Check log: $log_file"
+            kill "$pid" 2>/dev/null || true
+            return 1
+        fi
+    done
+
+    # Give tail a moment to catch up with final output, then stop it
+    sleep 1
+    kill "$tail_pid" 2>/dev/null || true
+    wait "$tail_pid" 2>/dev/null || true
+
+    wait "$pid"
+    return $?
+}
+
+########################################
 # Disk space pre-flight check
 ########################################
 check_disk_space() {
