@@ -66,7 +66,7 @@ OUT_HIGH="$WORKDIR/output/high"
 OUT_LOW="$WORKDIR/output/low"
 TITLE_HIGH="${TITLE_HIGH:-Wan2.2_model_lora}"
 TITLE_LOW="${TITLE_LOW:-Wan2.2_model_lora}"
-AUTHOR="${AUTHOR:-HearmemanAI}"
+AUTHOR="${AUTHOR:-BlackpawStudio}"
 
 SETUP_MARKER="$REPO_DIR/.setup_done"
 

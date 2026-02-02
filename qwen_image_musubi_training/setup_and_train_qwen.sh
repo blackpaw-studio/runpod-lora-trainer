@@ -57,7 +57,7 @@ QWEN_TEXT_ENCODER="$MODELS_DIR/text_encoders/split_files/text_encoders/qwen_2.5_
 
 OUTPUT_DIR="$WORKDIR/output"
 TITLE="${TITLE:-Qwen_image_lora}"
-AUTHOR="${AUTHOR:-HearmemanAI}"
+AUTHOR="${AUTHOR:-BlackpawStudio}"
 
 SETUP_MARKER="$REPO_DIR/.setup_done"
 

@@ -21,7 +21,7 @@ trap cleanup SIGINT SIGTERM
 
 # Welcome message
 clear
-print_header "Welcome to HearmemanAI LoRA Trainer using Diffusion Pipe"
+print_header "Welcome to Blackpaw Studio LoRA Trainer"
 echo ""
 echo -e "${PURPLE}This interactive script will guide you through setting up and starting a LoRA training session.${NC}"
 echo -e "${RED}Before you start, make sure to add your datasets to their respective folders.${NC}"
@@ -346,13 +346,13 @@ case $MODEL_TYPE in
             print_info "flux.toml already exists in examples directory"
             # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/flux_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/flux.toml"
-        elif [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/flux.toml" ]; then
+        elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/flux_lora'|" "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/flux.toml"
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/flux.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/flux_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml"
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved flux.toml to examples directory"
         else
-            print_warning "flux.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/flux.toml"
+            print_warning "flux.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/flux.toml"
         fi
         check_disk_space "$NETWORK_VOLUME" 30 "Flux model"
@@ -372,13 +372,13 @@ case $MODEL_TYPE in
             print_info "sdxl.toml already exists in examples directory"
             # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/sdxl_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml"
-        elif [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/sdxl.toml" ]; then
+        elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/sdxl_lora'|" "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/sdxl.toml"
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/sdxl.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/sdxl_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml"
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved sdxl.toml to examples directory"
         else
-            print_warning "sdxl.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/sdxl.toml"
+            print_warning "sdxl.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml"
         fi
         check_disk_space "$NETWORK_VOLUME" 7 "SDXL model"
@@ -397,13 +397,13 @@ case $MODEL_TYPE in
             print_info "wan13_video.toml already exists in examples directory"
             # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan13_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml"
-        elif [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan13_video.toml" ]; then
+        elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan13_lora'|" "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan13_video.toml"
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan13_video.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan13_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml"
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan13_video.toml to examples directory"
         else
-            print_warning "wan13_video.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan13_video.toml"
+            print_warning "wan13_video.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml"
         fi
         check_disk_space "$NETWORK_VOLUME" 5 "Wan 1.3B model"
@@ -423,13 +423,13 @@ case $MODEL_TYPE in
             print_info "wan14b_t2v.toml already exists in examples directory"
             # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_t2v_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml"
-        elif [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_t2v.toml" ]; then
+        elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_t2v_lora'|" "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_t2v.toml"
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_t2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_t2v_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml"
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan14b_t2v.toml to examples directory"
         else
-            print_warning "wan14b_t2v.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_t2v.toml"
+            print_warning "wan14b_t2v.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml"
         fi
         check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B T2V model"
@@ -449,13 +449,13 @@ case $MODEL_TYPE in
             print_info "wan14b_i2v.toml already exists in examples directory"
             # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_i2v_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml"
-        elif [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_i2v.toml" ]; then
+        elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_i2v_lora'|" "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_i2v.toml"
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_i2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_i2v_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml"
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan14b_i2v.toml to examples directory"
         else
-            print_warning "wan14b_i2v.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_i2v.toml"
+            print_warning "wan14b_i2v.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml"
         fi
         check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B I2V model"
@@ -475,13 +475,13 @@ case $MODEL_TYPE in
             print_info "qwen_toml.toml already exists in examples directory"
             # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/qwen_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
-        elif [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/qwen_toml.toml" ]; then
+        elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/qwen_lora'|" "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/qwen_toml.toml"
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/qwen_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/qwen_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml"
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved qwen_toml.toml to examples directory"
         else
-            print_warning "qwen_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/qwen_toml.toml"
+            print_warning "qwen_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
         fi
         check_disk_space "$NETWORK_VOLUME" 15 "Qwen Image 2512 model"
@@ -501,13 +501,13 @@ case $MODEL_TYPE in
             print_info "z_image_toml.toml already exists in examples directory"
             # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/z_image_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml"
-        elif [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/z_image_toml.toml" ]; then
+        elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/z_image_lora'|" "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/z_image_toml.toml"
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/z_image_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/z_image_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml"
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved z_image_toml.toml to examples directory"
         else
-            print_warning "z_image_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/z_image_toml.toml"
+            print_warning "z_image_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml"
         fi
         check_disk_space "$NETWORK_VOLUME" 15 "Z Image Turbo model"

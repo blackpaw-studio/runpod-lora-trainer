@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# common.sh — shared shell library for runpod-diffusion_pipe scripts
+# common.sh — shared shell library for runpod-lora-trainer scripts
 # Sourced at runtime from /usr/local/lib/runpod_common.sh
 # (copied there by start_script.sh after cloning the repo)
 

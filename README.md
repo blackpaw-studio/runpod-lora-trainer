@@ -1,4 +1,4 @@
-# HearmemanAI LoRA Trainer - Quick Start Guide
+# Blackpaw Studio LoRA Trainer - Quick Start Guide
 
 Deploy here: https://get.runpod.io/diffusion-pipe-template
 

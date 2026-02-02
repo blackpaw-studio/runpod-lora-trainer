@@ -206,16 +206,16 @@ jupyter-lab --ip=0.0.0.0 --allow-root --no-browser \
     --notebook-dir="$NETWORK_VOLUME" &
 
 # Move repository files to the working directory
-if [ -d "/tmp/runpod-diffusion_pipe" ]; then
+if [ -d "/tmp/runpod-lora-trainer" ]; then
     # Move the entire repository to working directory
-    mv /tmp/runpod-diffusion_pipe "$NETWORK_VOLUME/"
-    mv "$NETWORK_VOLUME/runpod-diffusion_pipe/Captioning" "$NETWORK_VOLUME/"
-    mv "$NETWORK_VOLUME/runpod-diffusion_pipe/wan2.2_lora_training" "$NETWORK_VOLUME/"
+    mv /tmp/runpod-lora-trainer "$NETWORK_VOLUME/"
+    mv "$NETWORK_VOLUME/runpod-lora-trainer/Captioning" "$NETWORK_VOLUME/"
+    mv "$NETWORK_VOLUME/runpod-lora-trainer/wan2.2_lora_training" "$NETWORK_VOLUME/"
     
     # Only move Qwen folder if IS_DEV is set to true
     if [ "$IS_DEV" == "true" ]; then
-        mv "$NETWORK_VOLUME/runpod-diffusion_pipe/qwen_image_musubi_training" "$NETWORK_VOLUME/" 2>/dev/null || true
-        mv "$NETWORK_VOLUME/runpod-diffusion_pipe/z_image_musubi_training" "$NETWORK_VOLUME/" 2>/dev/null || true
+        mv "$NETWORK_VOLUME/runpod-lora-trainer/qwen_image_musubi_training" "$NETWORK_VOLUME/" 2>/dev/null || true
+        mv "$NETWORK_VOLUME/runpod-lora-trainer/z_image_musubi_training" "$NETWORK_VOLUME/" 2>/dev/null || true
     fi
 
 
@@ -239,7 +239,7 @@ if [ -d "/tmp/runpod-diffusion_pipe" ]; then
 
 
     echo "Updating TOML file paths..."
-    TOML_DIR="$NETWORK_VOLUME/runpod-diffusion_pipe/toml_files"
+    TOML_DIR="$NETWORK_VOLUME/runpod-lora-trainer/toml_files"
     if [ -d "$TOML_DIR" ]; then
         # Update paths in TOML files to use NETWORK_VOLUME
         for toml_file in "$TOML_DIR"/*.toml; do
@@ -268,26 +268,26 @@ if [ -d "/tmp/runpod-diffusion_pipe" ]; then
     fi
 
     # Move training scripts and utilities
-    if [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/interactive_start_training.sh" ]; then
-        mv "$NETWORK_VOLUME/runpod-diffusion_pipe/interactive_start_training.sh" "$NETWORK_VOLUME/"
+    if [ -f "$NETWORK_VOLUME/runpod-lora-trainer/interactive_start_training.sh" ]; then
+        mv "$NETWORK_VOLUME/runpod-lora-trainer/interactive_start_training.sh" "$NETWORK_VOLUME/"
         chmod +x "$NETWORK_VOLUME/interactive_start_training.sh"
     fi
 
-    if [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/HowToUse.txt" ]; then
-        mv "$NETWORK_VOLUME/runpod-diffusion_pipe/HowToUse.txt" "$NETWORK_VOLUME/"
+    if [ -f "$NETWORK_VOLUME/runpod-lora-trainer/HowToUse.txt" ]; then
+        mv "$NETWORK_VOLUME/runpod-lora-trainer/HowToUse.txt" "$NETWORK_VOLUME/"
     fi
 
     # Set up send_lora.sh script
-    if [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/send_lora.sh" ]; then
-        chmod +x "$NETWORK_VOLUME/runpod-diffusion_pipe/send_lora.sh"
-        cp "$NETWORK_VOLUME/runpod-diffusion_pipe/send_lora.sh" /usr/local/bin/
+    if [ -f "$NETWORK_VOLUME/runpod-lora-trainer/send_lora.sh" ]; then
+        chmod +x "$NETWORK_VOLUME/runpod-lora-trainer/send_lora.sh"
+        cp "$NETWORK_VOLUME/runpod-lora-trainer/send_lora.sh" /usr/local/bin/
     fi
 
     # Clean up examples and move dataset.toml
     if [ -d "$NETWORK_VOLUME/diffusion_pipe/examples" ]; then
         rm -rf "$NETWORK_VOLUME/diffusion_pipe/examples"/*
-        if [ -f "$NETWORK_VOLUME/runpod-diffusion_pipe/dataset.toml" ]; then
-            mv "$NETWORK_VOLUME/runpod-diffusion_pipe/dataset.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
+        if [ -f "$NETWORK_VOLUME/runpod-lora-trainer/dataset.toml" ]; then
+            mv "$NETWORK_VOLUME/runpod-lora-trainer/dataset.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
         fi
     fi
 fi
