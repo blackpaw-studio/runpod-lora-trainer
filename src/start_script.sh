@@ -15,12 +15,12 @@ fi
 
 # Clone the repository to a temporary location with the specified branch
 echo "Cloning branch '$BRANCH' from repository..."
-git clone --branch "$BRANCH" https://github.com/Hearmeman24/runpod-diffusion_pipe.git /tmp/runpod-diffusion_pipe
+git clone --branch "$BRANCH" https://github.com/evandcoleman/runpod-diffusion_pipe.git /tmp/runpod-diffusion_pipe
 
 # Check if clone was successful
 if [ $? -ne 0 ]; then
     echo "Error: Failed to clone branch '$BRANCH'. Falling back to main branch..."
-    git clone https://github.com/Hearmeman24/runpod-diffusion_pipe.git /tmp/runpod-diffusion_pipe
+    git clone https://github.com/evandcoleman/runpod-diffusion_pipe.git /tmp/runpod-diffusion_pipe
 
     if [ $? -ne 0 ]; then
         echo "Error: Failed to clone repository. Exiting..."
