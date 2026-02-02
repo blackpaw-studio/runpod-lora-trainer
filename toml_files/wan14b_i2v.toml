@@ -1,5 +1,5 @@
 # Output path for training runs. Each training run makes a new directory in here.
-output_dir = '/data/diffusion_pipe_training_runs/wan14b_i2v_video_loras'
+output_dir = '/training_outputs/diffusion_pipe_training_runs/wan14b_i2v_video_loras'
 
 # Dataset config file.
 dataset = 'examples/dataset.toml'

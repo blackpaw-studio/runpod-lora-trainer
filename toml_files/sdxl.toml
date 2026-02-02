@@ -1,5 +1,5 @@
 # Output path for training runs. Each training run makes a new directory in here.
-output_dir = '/data/diffusion_pipe_training_runs/sdxl_lora'
+output_dir = '/training_outputs/diffusion_pipe_training_runs/sdxl_lora'
 
 save_every_n_epochs = 10
 epochs = 100  
