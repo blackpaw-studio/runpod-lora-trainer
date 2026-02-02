@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Determine which branch to clone based on environment variables
-BRANCH="master"  # Default branch
+BRANCH="main"  # Default branch
 
 if [ "$is_dev" == "true" ]; then
     BRANCH="dev"
@@ -10,7 +10,7 @@ elif [ -n "$git_branch" ]; then
     BRANCH="$git_branch"
     echo "Custom branch specified: $git_branch"
 else
-    echo "Using default branch: master"
+    echo "Using default branch: main"
 fi
 
 # Clone the repository to a temporary location with the specified branch
