@@ -51,7 +51,7 @@ MODELS_DIR="$WORKDIR/models"
 
 REPO_DIR="$WORKDIR/musubi-tuner"
 
-QWEN_DIT="$MODELS_DIR/diffusion_models/split_files/diffusion_models/qwen_image_bf16.safetensors"
+QWEN_DIT="$MODELS_DIR/diffusion_models/split_files/diffusion_models/qwen_image_2512_bf16.safetensors"
 QWEN_VAE="$MODELS_DIR/vae/vae/diffusion_pytorch_model.safetensors"
 QWEN_TEXT_ENCODER="$MODELS_DIR/text_encoders/split_files/text_encoders/qwen_2.5_vl_7b.safetensors"
 
@@ -114,23 +114,23 @@ if [ ! -f "$SETUP_MARKER" ] || [ "$FORCE_SETUP" = "1" ]; then
   export HF_HUB_ENABLE_HF_TRANSFER=1 || true
 
   # 4) Download models (idempotent)
-  echo ">>> Downloading Qwen-Image models to $MODELS_DIR ..."
-  
+  echo ">>> Downloading Qwen-Image-2512 models to $MODELS_DIR ..."
+
   # Create necessary subdirectories for split files
   mkdir -p "$MODELS_DIR/diffusion_models/split_files/diffusion_models"
   mkdir -p "$MODELS_DIR/text_encoders/split_files/text_encoders"
   mkdir -p "$MODELS_DIR/vae/vae"
-  
-  # Download Qwen-Image DiT
-  hf download Comfy-Org/Qwen-Image_ComfyUI split_files/diffusion_models/qwen_image_bf16.safetensors \
+
+  # Download Qwen-Image-2512 DiT
+  hf download Comfy-Org/Qwen-Image_ComfyUI split_files/diffusion_models/qwen_image_2512_bf16.safetensors \
     --local-dir "$MODELS_DIR/diffusion_models"
-  
-  # Download Qwen Text Encoder (Qwen2.5-VL)
+
+  # Download Qwen Text Encoder (Qwen2.5-VL) — shared across Qwen-Image versions
   hf download Comfy-Org/Qwen-Image_ComfyUI split_files/text_encoders/qwen_2.5_vl_7b.safetensors \
     --local-dir "$MODELS_DIR/text_encoders"
-  
-  # Download Qwen VAE
-  hf download Qwen/Qwen-Image vae/diffusion_pytorch_model.safetensors \
+
+  # Download Qwen VAE — shared across Qwen-Image versions
+  hf download Qwen/Qwen-Image-2512 vae/diffusion_pytorch_model.safetensors \
     --local-dir "$MODELS_DIR/vae"
 
   touch "$SETUP_MARKER"

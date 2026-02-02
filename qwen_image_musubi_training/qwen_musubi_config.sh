@@ -1,6 +1,6 @@
 # The file extension is purely so it shows up with nice colors on Jupyter, only god can judge me for making stupid decisions.
 
-# ====== Qwen-Image Musubi Config File ======
+# ====== Qwen-Image-2512 Musubi Config File ======
 # LoRA rank drives both network_dim and network_alpha
 LORA_RANK=16
 

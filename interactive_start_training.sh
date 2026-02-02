@@ -484,10 +484,10 @@ case $MODEL_TYPE in
             print_warning "qwen_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/qwen_toml.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 15 "Qwen Image model"
-        print_info "Starting Qwen Image model download in background..."
-        mkdir -p "$NETWORK_VOLUME/models/Qwen-Image"
-        hf download Qwen/Qwen-Image --local-dir "$NETWORK_VOLUME/models/Qwen-Image" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        check_disk_space "$NETWORK_VOLUME" 15 "Qwen Image 2512 model"
+        print_info "Starting Qwen Image 2512 model download in background..."
+        mkdir -p "$NETWORK_VOLUME/models/Qwen-Image-2512"
+        hf download Qwen/Qwen-Image-2512 --local-dir "$NETWORK_VOLUME/models/Qwen-Image-2512" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
         BACKGROUND_PIDS+=("$!")
         ;;
@@ -666,8 +666,8 @@ if [ -n "$MODEL_DOWNLOAD_PID" ]; then
             fi
             ;;
         "qwen")
-            if [ ! -d "$NETWORK_VOLUME/models/Qwen-Image" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Qwen-Image" 2>/dev/null)" ]; then
-                print_error "Qwen Image model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
+            if [ ! -d "$NETWORK_VOLUME/models/Qwen-Image-2512" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Qwen-Image-2512" 2>/dev/null)" ]; then
+                print_error "Qwen Image 2512 model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
                 exit 1
             fi
             ;;
