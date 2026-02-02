@@ -1,0 +1,9 @@
+.git
+.idea
+*.DS_Store
+*.log
+LICENSE
+README.md
+CLAUDE.md
+.circleci
+.gitignore

@@ -1,2 +1,8 @@
 .env
-video/.DS_Store
+*.DS_Store
+.idea/
+firebase-debug.log
+__pycache__/
+*.pyc
+*.log
+*.backup
