@@ -29,7 +29,8 @@ check_cuda_compatibility
 ########################################
 # Load user config
 ########################################
-CONFIG_FILE="${CONFIG_FILE:-z_image_musubi_config.sh}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/z_image_musubi_config.sh}"
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "ERROR: Config file '$CONFIG_FILE' not found. Create it and re-run."
   echo "Tip: use a Bash-y config with syntax highlighting, e.g.: z_image_musubi_config.sh"

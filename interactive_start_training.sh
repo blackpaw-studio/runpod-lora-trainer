@@ -362,6 +362,7 @@ case $MODEL_TYPE in
             print_warning "flux.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/flux.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/flux.toml"
         fi
+        check_disk_space "$NETWORK_VOLUME" 30 "Flux model"
         print_info "Starting Flux model download in background..."
         mkdir -p "$NETWORK_VOLUME/models/flux"
         hf download black-forest-labs/FLUX.1-dev --local-dir "$NETWORK_VOLUME/models/flux" --repo-type model --token "$HUGGING_FACE_TOKEN" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
@@ -387,6 +388,7 @@ case $MODEL_TYPE in
             print_warning "sdxl.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/sdxl.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml"
         fi
+        check_disk_space "$NETWORK_VOLUME" 7 "SDXL model"
         print_info "Starting Base SDXL model download in background..."
         hf download timoshishi/sdXL_v10VAEFix sdXL_v10VAEFix.safetensors --local-dir "$NETWORK_VOLUME/models/" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
         MODEL_DOWNLOAD_PID=$!
@@ -411,6 +413,7 @@ case $MODEL_TYPE in
             print_warning "wan13_video.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan13_video.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml"
         fi
+        check_disk_space "$NETWORK_VOLUME" 5 "Wan 1.3B model"
         print_info "Starting Wan 1.3B model download in background..."
         mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B"
         hf download Wan-AI/Wan2.1-T2V-1.3B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
@@ -436,6 +439,7 @@ case $MODEL_TYPE in
             print_warning "wan14b_t2v.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_t2v.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml"
         fi
+        check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B T2V model"
         print_info "Starting Wan 14B T2V model download in background..."
         mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B"
         hf download Wan-AI/Wan2.1-T2V-14B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
@@ -461,6 +465,7 @@ case $MODEL_TYPE in
             print_warning "wan14b_i2v.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/wan14b_i2v.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml"
         fi
+        check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B I2V model"
         print_info "Starting Wan 14B I2V model download in background..."
         mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P"
         hf download Wan-AI/Wan2.1-I2V-14B-480P --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
@@ -486,6 +491,7 @@ case $MODEL_TYPE in
             print_warning "qwen_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/qwen_toml.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
         fi
+        check_disk_space "$NETWORK_VOLUME" 15 "Qwen Image model"
         print_info "Starting Qwen Image model download in background..."
         mkdir -p "$NETWORK_VOLUME/models/Qwen-Image"
         hf download Qwen/Qwen-Image --local-dir "$NETWORK_VOLUME/models/Qwen-Image" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
@@ -511,6 +517,7 @@ case $MODEL_TYPE in
             print_warning "z_image_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-diffusion_pipe/toml_files/z_image_toml.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml"
         fi
+        check_disk_space "$NETWORK_VOLUME" 15 "Z Image Turbo model"
         print_info "Starting Z Image Turbo model download in background..."
         mkdir -p "$NETWORK_VOLUME/models/z_image"
         # Download model files using hf download and move to expected location
