@@ -18,10 +18,6 @@ export NETWORK_VOLUME
 
 echo "cd $NETWORK_VOLUME" >> /root/.bashrc
 
-#cd "$NETWORK_VOLUME/diffusion_pipe_working_folder/diffusion-pipe" || exit 1
-#git pull || true
-#cd "$NETWORK_VOLUME" || exit 1
-
 # GPU detection for optimized flash-attn build
 # Returns architecture in FLASH_ATTN_CUDA_ARCHS format (e.g., "90" for sm_90)
 detect_cuda_arch() {
@@ -248,8 +244,6 @@ if [ -d "/tmp/runpod-diffusion_pipe" ]; then
         for toml_file in "$TOML_DIR"/*.toml; do
             if [ -f "$toml_file" ]; then
                 echo "Processing: $(basename "$toml_file")"
-                # Create backup
-                cp "$toml_file" "$toml_file.backup"
 
                 # Update various path patterns - replace absolute paths with NETWORK_VOLUME paths
                 sed -i "s|diffusers_path = '/models/|diffusers_path = '$NETWORK_VOLUME/models/|g" "$toml_file"
