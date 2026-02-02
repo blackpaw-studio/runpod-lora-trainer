@@ -628,7 +628,7 @@ if [ -n "$MODEL_DOWNLOAD_PID" ]; then
     print_info "Waiting for model download to complete..."
     echo ""
     if ! wait_with_log "$MODEL_DOWNLOAD_PID" "$NETWORK_VOLUME/logs/model_download.log" \
-            "Model download" 10800 "error|failed|exception|unauthorized|403|404"; then
+            "Model download" 10800 "(^ERROR|^fatal:|HTTP.*40[134]|unauthorized|Download failed|Permission denied)"; then
         exit 1
     fi
     

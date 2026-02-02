@@ -215,7 +215,11 @@ check_disk_space() {
     local path="$1" required_gb="$2" label="${3:-download}"
     local available_gb
     available_gb=$(df -BG "$path" 2>/dev/null | awk 'NR==2 {gsub(/G/,"",$4); print $4}')
-    if [ -n "$available_gb" ] && [ "$available_gb" -lt "$required_gb" ] 2>/dev/null; then
+    if [ -z "$available_gb" ]; then
+        print_warning "Could not determine available disk space at $path — skipping check for $label"
+        return 0
+    fi
+    if [ "$available_gb" -lt "$required_gb" ] 2>/dev/null; then
         print_error "Insufficient disk space for $label. Need ${required_gb}GB, have ${available_gb}GB at $path"
         return 1
     fi
