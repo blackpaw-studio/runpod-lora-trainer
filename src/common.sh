@@ -42,6 +42,24 @@ print_info() {
 }
 
 ########################################
+# Skippable countdown
+########################################
+# Usage: countdown_or_enter SECONDS [MESSAGE]
+# Shows a countdown that can be skipped by pressing Enter.
+countdown_or_enter() {
+    local seconds="${1:-10}" msg="${2:-Press Enter to skip...}"
+    echo -e "${YELLOW}${msg}${NC}"
+    for (( i=seconds; i>=1; i-- )); do
+        printf "\r  %d... " "$i"
+        # read with 1-second timeout; if user presses Enter, break
+        if read -t 1 -r -s -n 1 2>/dev/null; then
+            break
+        fi
+    done
+    printf "\r         \r"
+}
+
+########################################
 # GPU helpers
 ########################################
 gpu_count() {
@@ -72,12 +90,7 @@ warn_blackwell_gpu() {
             echo -e "${BOLD}${RED}For best compatibility, use H100 or H200 GPUs.${NC}"
             echo -e "${BOLD}${RED}════════════════════════════════════════════════════════════════${NC}"
             echo ""
-            echo -n "Continuing in "
-            for i in 10 9 8 7 6 5 4 3 2 1; do
-                echo -n "$i.."
-                sleep 1
-            done
-            echo ""
+            countdown_or_enter 10 "Press Enter to continue, or waiting 10 seconds..."
             echo ""
         fi
     fi

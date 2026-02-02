@@ -9,7 +9,11 @@ else
 fi
 
 echo "By running this script you're accepting Conda's TOS, if you do not accept those, please stop the script by clicking CTRL c"
-sleep 5
+# Source shared library (countdown, CUDA check, etc.)
+if [ -f /usr/local/lib/runpod_common.sh ]; then
+    source /usr/local/lib/runpod_common.sh
+fi
+countdown_or_enter 5 "Press Enter to accept, or waiting 5 seconds..."
 
 REPO_DIR="/TripleX"
 REPO_URL="https://github.com/Hearmeman24/TripleX.git"
@@ -74,11 +78,6 @@ else
     else
         echo "Warning: Requirements file not found at $REQUIREMENTS_PATH"
     fi
-fi
-
-# Source shared library for CUDA check
-if [ -f /usr/local/lib/runpod_common.sh ]; then
-    source /usr/local/lib/runpod_common.sh
 fi
 
 # Uses 'python' (conda env) instead of 'python3'

@@ -43,16 +43,9 @@ elif [ -f /tmp/flash_attn_pid ]; then
     if kill -0 "$FLASH_ATTN_PID" 2>/dev/null; then
         print_warning "flash-attn is still being compiled from source (PID: $FLASH_ATTN_PID)"
         print_info "Waiting for flash-attn compilation to complete..."
-        print_info "To monitor progress: tail -f $NETWORK_VOLUME/logs/flash_attn_install.log"
         echo ""
-        while kill -0 "$FLASH_ATTN_PID" 2>/dev/null; do
-            echo -n "."
-            sleep 2
-        done
-        echo ""
-        # Check if installation succeeded
-        wait "$FLASH_ATTN_PID" 2>/dev/null
-        if [ $? -eq 0 ]; then
+        if wait_with_log "$FLASH_ATTN_PID" "$NETWORK_VOLUME/logs/flash_attn_install.log" \
+                "flash-attn compilation" 1800; then
             print_success "flash-attn compilation completed successfully!"
         else
             print_warning "flash-attn compilation may have failed. Check log: $NETWORK_VOLUME/logs/flash_attn_install.log"
@@ -1058,8 +1051,7 @@ if [ "$MODEL_TYPE" = "qwen" ]; then
     print_warning "⚠️  The script may appear to hang during initialization - this is NORMAL."
     print_warning "⚠️  As long as the script doesn't exit with an error, let it run."
     echo ""
-    print_info "Waiting 10 seconds for you to read this message..."
-    sleep 10
+    countdown_or_enter 10 "Press Enter to continue, or waiting 10 seconds..."
     echo ""
 fi
 
@@ -1069,8 +1061,7 @@ if [ "$MODEL_TYPE" = "z_image_turbo" ]; then
     print_warning "⚠️  The script may appear to hang during initialization - this is NORMAL."
     print_warning "⚠️  As long as the script doesn't exit with an error, let it run."
     echo ""
-    print_info "Waiting 10 seconds for you to read this message..."
-    sleep 10
+    countdown_or_enter 10 "Press Enter to continue, or waiting 10 seconds..."
     echo ""
 fi
 
