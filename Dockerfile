@@ -27,7 +27,6 @@ RUN pip install --no-cache-dir gdown jupyterlab jupyterlab-lsp \
 FROM base AS final
 
 # Clone the repository in the final stage
-RUN pip install torch torchvision torchaudio
 RUN git clone --recurse-submodules https://github.com/tdrussell/diffusion-pipe /diffusion_pipe
 # Install requirements but exclude flash-attn to avoid build issues
 RUN grep -v -i "flash-attn\|flash-attention" /diffusion_pipe/requirements.txt > /tmp/requirements_no_flash.txt && \
