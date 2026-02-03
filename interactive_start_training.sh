@@ -1058,17 +1058,18 @@ echo ""
 # Start background watcher to copy checkpoints with LoRA name as they save
 OUTPUT_DIR="$NETWORK_VOLUME/output_folder/$LORA_NAME"
 (
-    SEEN=""
+    set +e  # Disable errexit in watcher subshell
+    declare -A SEEN
     while true; do
         for epoch_dir in "$OUTPUT_DIR"/epoch*; do
             [ -d "$epoch_dir" ] || continue
             epoch_num="${epoch_dir##*epoch}"
             src="$epoch_dir/adapter_model.safetensors"
             dst="$OUTPUT_DIR/${LORA_NAME}_${epoch_num}.safetensors"
-            if [ -f "$src" ] && ! echo "$SEEN" | grep -qF "|$epoch_num|"; then
+            if [ -f "$src" ] && [ -z "${SEEN[$epoch_num]+x}" ]; then
                 cp "$src" "$dst"
                 echo "[LoRA Watcher] Created ${LORA_NAME}_${epoch_num}.safetensors"
-                SEEN="${SEEN}|${epoch_num}|"
+                SEEN[$epoch_num]=1
             fi
         done
         sleep 30
