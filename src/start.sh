@@ -307,21 +307,9 @@ if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/dataset.toml" ]; then
     sed -i "s|path = '/home/anon/data/images/grayscale'|path = '$NETWORK_VOLUME/image_dataset_here'|" "$NETWORK_VOLUME/diffusion_pipe/examples/dataset.toml"
 fi
 
-echo "Installing torch"
-pip install torch torchvision torchaudio
-
-echo "Upgrading transformers package..."
-pip install transformers -U
-
-echo "Installing huggingface-cli..."
-pip install --upgrade "huggingface_hub[cli]"
-
-echo "Upgrading peft package..."
-pip install --upgrade "peft>=0.17.0"
-
-echo "Updating diffusers package..."
-pip uninstall -y diffusers
-pip install git+https://github.com/huggingface/diffusers
+echo "Checking for package updates..."
+pip install --upgrade transformers "peft>=0.17.0" "huggingface_hub[cli]" -q
+pip install git+https://github.com/huggingface/diffusers -q
 
 echo "================================================"
 echo "✅ Jupyter Lab is running and accessible via the web interface"
