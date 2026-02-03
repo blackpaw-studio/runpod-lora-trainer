@@ -28,15 +28,18 @@ RUN pip install --no-cache-dir jupyterlab \
 # Create the final image
 FROM base AS final
 
-# Shallow clone diffusion-pipe and strip .git to save image space
+# Install deepspeed first (slow, changes rarely)
+RUN pip install --no-cache-dir --upgrade deepspeed
+
+# Fetch only requirements.txt so this layer is cached unless deps change
+ADD https://raw.githubusercontent.com/tdrussell/diffusion-pipe/main/requirements.txt /tmp/requirements.txt
+RUN grep -v -i "flash-attn\|flash-attention" /tmp/requirements.txt > /tmp/requirements_no_flash.txt && \
+    pip install --no-cache-dir -r /tmp/requirements_no_flash.txt
+
+# Shallow clone diffusion-pipe last (changes most often, cheapest layer)
 RUN git clone --depth 1 --recurse-submodules --shallow-submodules \
     https://github.com/tdrussell/diffusion-pipe /diffusion_pipe && \
     rm -rf /diffusion_pipe/.git /diffusion_pipe/**/.git
-
-# Install requirements but exclude flash-attn to avoid build issues
-RUN grep -v -i "flash-attn\|flash-attention" /diffusion_pipe/requirements.txt > /tmp/requirements_no_flash.txt && \
-    pip install --no-cache-dir -r /tmp/requirements_no_flash.txt && \
-    pip install --no-cache-dir --upgrade deepspeed
 
 # Clean up build artifacts
 RUN rm -rf /tmp/* /root/.cache
