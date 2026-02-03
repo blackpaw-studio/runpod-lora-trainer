@@ -307,8 +307,12 @@ if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/dataset.toml" ]; then
     sed -i "s|path = '/home/anon/data/images/grayscale'|path = '$NETWORK_VOLUME/image_dataset_here'|" "$NETWORK_VOLUME/diffusion_pipe/examples/dataset.toml"
 fi
 
+echo "Installing torch..."
+pip install torch torchvision torchaudio
+
 echo "Checking for package updates..."
 pip install --upgrade transformers "peft>=0.17.0" "huggingface_hub[cli]" -q
+pip uninstall -y diffusers
 pip install git+https://github.com/huggingface/diffusers -q
 
 echo "================================================"

@@ -38,11 +38,6 @@ RUN grep -v -i "flash-attn\|flash-attention" /diffusion_pipe/requirements.txt > 
     pip install --no-cache-dir -r /tmp/requirements_no_flash.txt && \
     pip install --no-cache-dir --upgrade deepspeed
 
-# Bake torch and key packages into image to avoid re-downloading on every pod start
-RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 && \
-    pip install --no-cache-dir --upgrade transformers "peft>=0.17.0" "huggingface_hub[cli]" && \
-    pip install --no-cache-dir git+https://github.com/huggingface/diffusers
-
 # Clean up build artifacts
 RUN rm -rf /tmp/* /root/.cache
 
