@@ -1061,7 +1061,7 @@ OUTPUT_DIR="$OUTPUT_DIR"
 LORA_NAME="$LORA_NAME"
 echo "LoRA watcher started: OUTPUT_DIR=\$OUTPUT_DIR LORA_NAME=\$LORA_NAME"
 while true; do
-    for epoch_dir in "\$OUTPUT_DIR"/epoch*; do
+    for epoch_dir in "\$OUTPUT_DIR"/*/epoch*; do
         test -d "\$epoch_dir" || continue
         epoch_num=\$(echo "\$epoch_dir" | grep -o '[0-9]*$')
         src="\$epoch_dir/adapter_model.safetensors"
@@ -1086,9 +1086,9 @@ NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" deepspeed --num_gpus=1 train.py --deeps
 kill "$LORA_WATCHER_PID" 2>/dev/null || true
 
 # Final pass to catch any checkpoints saved right before training ended
-for epoch_dir in "$OUTPUT_DIR"/epoch*; do
+for epoch_dir in "$OUTPUT_DIR"/*/epoch*; do
     [ -d "$epoch_dir" ] || continue
-    epoch_num="${epoch_dir##*epoch}"
+    epoch_num=$(echo "$epoch_dir" | grep -o '[0-9]*$')
     src="$epoch_dir/adapter_model.safetensors"
     dst="$OUTPUT_DIR/${LORA_NAME}_${epoch_num}.safetensors"
     if [ -f "$src" ] && [ ! -f "$dst" ]; then
