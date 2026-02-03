@@ -76,6 +76,11 @@ detect_cuda_arch() {
     esac
 }
 
+# Install torch first so flash-attn wheel matches the runtime version
+# The prebuilt flash-attn wheel below is compiled for torch 2.9 + CUDA 12.8
+echo "Installing torch 2.9 (required for flash-attn compatibility)..."
+pip install torch==2.9.* torchvision torchaudio
+
 # Install flash-attn
 # Strategy: Try prebuilt wheel first (fast) in foreground, fall back to building from source in background if needed
 echo "Installing flash-attn..."
@@ -307,11 +312,8 @@ if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/dataset.toml" ]; then
     sed -i "s|path = '/home/anon/data/images/grayscale'|path = '$NETWORK_VOLUME/image_dataset_here'|" "$NETWORK_VOLUME/diffusion_pipe/examples/dataset.toml"
 fi
 
-echo "Installing torch..."
-pip install torch torchvision torchaudio
-
 echo "Checking for package updates..."
-pip install --upgrade transformers "peft>=0.17.0" "huggingface_hub[cli]" -q
+pip install --no-deps --upgrade transformers "peft>=0.17.0" "huggingface_hub[cli]" -q
 pip uninstall -y diffusers
 pip install git+https://github.com/huggingface/diffusers -q
 
