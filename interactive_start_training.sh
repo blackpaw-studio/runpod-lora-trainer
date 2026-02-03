@@ -1019,11 +1019,8 @@ print_info "Changing to diffusion_pipe directory..."
 cd "$NETWORK_VOLUME/diffusion_pipe"
 
 print_info "Ensuring dependencies are up to date before training..."
-print_info "Upgrading transformers package..."
-pip install transformers -U
-
-print_info "Upgrading peft package..."
-pip install --upgrade "peft>=0.17.0"
+print_info "Upgrading transformers and peft packages..."
+pip install --no-deps -U transformers "peft>=0.17.0"
 
 echo ""
 
