@@ -1096,4 +1096,15 @@ for epoch_dir in "$OUTPUT_DIR"/epoch*; do
     fi
 done
 
+# Create zip of all named LoRA files
+ZIP_FILE="$OUTPUT_DIR/${LORA_NAME}.zip"
+LORA_FILES=("$OUTPUT_DIR"/${LORA_NAME}_*.safetensors)
+if [ -f "${LORA_FILES[0]}" ]; then
+    print_info "Creating zip archive of LoRA files..."
+    zip -j "$ZIP_FILE" "$OUTPUT_DIR"/${LORA_NAME}_*.safetensors
+    print_success "Created $ZIP_FILE ($(du -h "$ZIP_FILE" | cut -f1))"
+else
+    print_warning "No renamed LoRA files found to zip."
+fi
+
 print_success "Training completed!"
