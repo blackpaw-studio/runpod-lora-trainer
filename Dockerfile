@@ -30,7 +30,8 @@ FROM base AS final
 RUN git clone --recurse-submodules https://github.com/tdrussell/diffusion-pipe /diffusion_pipe
 # Install requirements but exclude flash-attn to avoid build issues
 RUN grep -v -i "flash-attn\|flash-attention" /diffusion_pipe/requirements.txt > /tmp/requirements_no_flash.txt && \
-    pip install -r /tmp/requirements_no_flash.txt
+    pip install -r /tmp/requirements_no_flash.txt && \
+    pip install --no-cache-dir --upgrade deepspeed
 
 
 COPY src/start_script.sh /start_script.sh
