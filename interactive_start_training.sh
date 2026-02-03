@@ -1055,28 +1055,27 @@ echo ""
 # Start background watcher to copy checkpoints with LoRA name as they save
 OUTPUT_DIR="$NETWORK_VOLUME/output_folder/$LORA_NAME"
 LORA_WATCHER_SCRIPT="/tmp/lora_watcher.sh"
-cat > "$LORA_WATCHER_SCRIPT" << 'WATCHER_EOF'
-#!/bin/bash
-OUTPUT_DIR="$1"
-LORA_NAME="$2"
-declare -A SEEN
+cat > "$LORA_WATCHER_SCRIPT" <<WATCHER_EOF
+#!/bin/sh
+OUTPUT_DIR="$OUTPUT_DIR"
+LORA_NAME="$LORA_NAME"
+echo "LoRA watcher started: OUTPUT_DIR=\$OUTPUT_DIR LORA_NAME=\$LORA_NAME"
 while true; do
-    for epoch_dir in "$OUTPUT_DIR"/epoch*; do
-        [ -d "$epoch_dir" ] || continue
-        epoch_num="${epoch_dir##*epoch}"
-        src="$epoch_dir/adapter_model.safetensors"
-        dst="$OUTPUT_DIR/${LORA_NAME}_${epoch_num}.safetensors"
-        if [ -f "$src" ] && [ -z "${SEEN[$epoch_num]+x}" ]; then
-            cp "$src" "$dst"
-            echo "[LoRA Watcher] Created ${LORA_NAME}_${epoch_num}.safetensors"
-            SEEN[$epoch_num]=1
+    for epoch_dir in "\$OUTPUT_DIR"/epoch*; do
+        test -d "\$epoch_dir" || continue
+        epoch_num=\$(echo "\$epoch_dir" | grep -o '[0-9]*$')
+        src="\$epoch_dir/adapter_model.safetensors"
+        dst="\$OUTPUT_DIR/\${LORA_NAME}_\${epoch_num}.safetensors"
+        if test -f "\$src" && test ! -f "\$dst"; then
+            cp "\$src" "\$dst"
+            echo "[LoRA Watcher] Created \${LORA_NAME}_\${epoch_num}.safetensors"
         fi
     done
     sleep 30
 done
 WATCHER_EOF
 chmod +x "$LORA_WATCHER_SCRIPT"
-bash "$LORA_WATCHER_SCRIPT" "$OUTPUT_DIR" "$LORA_NAME" > "$NETWORK_VOLUME/logs/lora_watcher.log" 2>&1 &
+sh "$LORA_WATCHER_SCRIPT" > "$NETWORK_VOLUME/logs/lora_watcher.log" 2>&1 &
 LORA_WATCHER_PID=$!
 BACKGROUND_PIDS+=("$LORA_WATCHER_PID")
 
