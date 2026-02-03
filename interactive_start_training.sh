@@ -316,56 +316,22 @@ echo ""
 print_success "Dataset validation completed successfully!"
 echo ""
 
-# Summary
-print_header "Training Configuration Summary"
-echo ""
-echo -e "${WHITE}Model:${NC} $MODEL_NAME"
-echo -e "${WHITE}TOML Config:${NC} $TOML_FILE"
-echo -e "${WHITE}Caption Mode:${NC} $CAPTION_MODE"
-
-if [ "$MODEL_TYPE" = "flux" ]; then
-    echo -e "${WHITE}Hugging Face Token:${NC} Set ✓"
-fi
-
-if [ "$CAPTION_MODE" = "videos" ] || [ "$CAPTION_MODE" = "both" ]; then
-    echo -e "${WHITE}Gemini API Key:${NC} Set ✓"
-fi
-
-echo ""
-print_info "Configuration completed! Starting model download and setup..."
-echo ""
-
 print_header "Checking CUDA Compatibility"
 check_cuda_compatibility
 echo ""
 
-# Model download logic - start in background
-print_header "Starting Model Download"
+# Set up TOML configuration files
+print_header "Setting Up Configuration Files"
 echo ""
 
-mkdir -p "$NETWORK_VOLUME/models"
-
-# Initialize MODEL_DOWNLOAD_PID to ensure it's always set
-MODEL_DOWNLOAD_PID=""
+mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
 
 case $MODEL_TYPE in
     "flux")
-        if [ -z "$HUGGING_FACE_TOKEN" ] || [ "$HUGGING_FACE_TOKEN" = "token_here" ]; then
-            print_error "HUGGING_FACE_TOKEN is not set properly."
-            exit 1
-        fi
-
-        print_info "HUGGING_FACE_TOKEN is set."
-        # Ensure examples directory exists
-        mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
-        
-        # Check if file already exists in destination
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/flux.toml" ]; then
             print_info "flux.toml already exists in examples directory"
-            # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/flux.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml" ]; then
-            # Update output_dir before moving
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved flux.toml to examples directory"
@@ -373,25 +339,12 @@ case $MODEL_TYPE in
             print_warning "flux.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/flux.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 30 "Flux model"
-        print_info "Starting Flux model download in background..."
-        mkdir -p "$NETWORK_VOLUME/models/flux"
-        hf download black-forest-labs/FLUX.1-dev --local-dir "$NETWORK_VOLUME/models/flux" --repo-type model --token "$HUGGING_FACE_TOKEN" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
-        MODEL_DOWNLOAD_PID=$!
-        BACKGROUND_PIDS+=("$!")
         ;;
-
     "sdxl")
-        # Ensure examples directory exists
-        mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
-        
-        # Check if file already exists in destination
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml" ]; then
             print_info "sdxl.toml already exists in examples directory"
-            # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml" ]; then
-            # Update output_dir before moving
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved sdxl.toml to examples directory"
@@ -399,24 +352,12 @@ case $MODEL_TYPE in
             print_warning "sdxl.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 7 "SDXL model"
-        print_info "Starting Base SDXL model download in background..."
-        hf download timoshishi/sdXL_v10VAEFix sdXL_v10VAEFix.safetensors --local-dir "$NETWORK_VOLUME/models/" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
-        MODEL_DOWNLOAD_PID=$!
-        BACKGROUND_PIDS+=("$!")
         ;;
-
     "wan13")
-        # Ensure examples directory exists
-        mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
-        
-        # Check if file already exists in destination
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml" ]; then
             print_info "wan13_video.toml already exists in examples directory"
-            # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml" ]; then
-            # Update output_dir before moving
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan13_video.toml to examples directory"
@@ -424,25 +365,12 @@ case $MODEL_TYPE in
             print_warning "wan13_video.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 5 "Wan 1.3B model"
-        print_info "Starting Wan 1.3B model download in background..."
-        mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B"
-        hf download Wan-AI/Wan2.1-T2V-1.3B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
-        MODEL_DOWNLOAD_PID=$!
-        BACKGROUND_PIDS+=("$!")
         ;;
-
     "wan14b_t2v")
-        # Ensure examples directory exists
-        mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
-        
-        # Check if file already exists in destination
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml" ]; then
             print_info "wan14b_t2v.toml already exists in examples directory"
-            # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml" ]; then
-            # Update output_dir before moving
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan14b_t2v.toml to examples directory"
@@ -450,25 +378,12 @@ case $MODEL_TYPE in
             print_warning "wan14b_t2v.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B T2V model"
-        print_info "Starting Wan 14B T2V model download in background..."
-        mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B"
-        hf download Wan-AI/Wan2.1-T2V-14B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
-        MODEL_DOWNLOAD_PID=$!
-        BACKGROUND_PIDS+=("$!")
         ;;
-
     "wan14b_i2v")
-        # Ensure examples directory exists
-        mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
-        
-        # Check if file already exists in destination
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml" ]; then
             print_info "wan14b_i2v.toml already exists in examples directory"
-            # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml" ]; then
-            # Update output_dir before moving
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan14b_i2v.toml to examples directory"
@@ -476,25 +391,12 @@ case $MODEL_TYPE in
             print_warning "wan14b_i2v.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B I2V model"
-        print_info "Starting Wan 14B I2V model download in background..."
-        mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P"
-        hf download Wan-AI/Wan2.1-I2V-14B-480P --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
-        MODEL_DOWNLOAD_PID=$!
-        BACKGROUND_PIDS+=("$!")
         ;;
-
     "qwen")
-        # Ensure examples directory exists
-        mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
-        
-        # Check if file already exists in destination
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml" ]; then
             print_info "qwen_toml.toml already exists in examples directory"
-            # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml" ]; then
-            # Update output_dir before moving
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved qwen_toml.toml to examples directory"
@@ -502,25 +404,12 @@ case $MODEL_TYPE in
             print_warning "qwen_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 15 "Qwen Image 2512 model"
-        print_info "Starting Qwen Image 2512 model download in background..."
-        mkdir -p "$NETWORK_VOLUME/models/Qwen-Image-2512"
-        hf download Qwen/Qwen-Image-2512 --local-dir "$NETWORK_VOLUME/models/Qwen-Image-2512" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
-        MODEL_DOWNLOAD_PID=$!
-        BACKGROUND_PIDS+=("$!")
         ;;
-
     "z_image_turbo")
-        # Ensure examples directory exists
-        mkdir -p "$NETWORK_VOLUME/diffusion_pipe/examples"
-        
-        # Check if file already exists in destination
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml" ]; then
             print_info "z_image_toml.toml already exists in examples directory"
-            # Update output_dir even if file already exists
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml" ]; then
-            # Update output_dir before moving
             sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved z_image_toml.toml to examples directory"
@@ -528,191 +417,10 @@ case $MODEL_TYPE in
             print_warning "z_image_toml.toml not found at expected location: $NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml"
             print_warning "Please ensure the file exists or manually copy it to: $NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml"
         fi
-        check_disk_space "$NETWORK_VOLUME" 15 "Z Image Turbo model"
-        print_info "Starting Z Image Turbo model download in background..."
-        mkdir -p "$NETWORK_VOLUME/models/z_image"
-        # Download model files using hf download and move to expected location
-        (
-            echo "Downloading Z Image Turbo models from HuggingFace..."
-            # Download main model files (diffusion model, VAE, text encoder)
-            hf download Comfy-Org/z_image_turbo --local-dir "$NETWORK_VOLUME/models/z_image_turbo_temp"
-            
-            echo "Moving model files to final location..."
-            # Move files to the expected location
-            mv "$NETWORK_VOLUME/models/z_image_turbo_temp/split_files/diffusion_models/z_image_turbo_bf16.safetensors" "$NETWORK_VOLUME/models/z_image/"
-            mv "$NETWORK_VOLUME/models/z_image_turbo_temp/split_files/vae/ae.safetensors" "$NETWORK_VOLUME/models/z_image/"
-            mv "$NETWORK_VOLUME/models/z_image_turbo_temp/split_files/text_encoders/qwen_3_4b.safetensors" "$NETWORK_VOLUME/models/z_image/"
-            
-            # Clean up temp directory
-            rm -rf "$NETWORK_VOLUME/models/z_image_turbo_temp"
-            
-            echo "Downloading Z Image Turbo training adapter..."
-            wget -q --show-progress -O "$NETWORK_VOLUME/models/z_image/zimage_turbo_training_adapter_v2.safetensors" \
-                "https://huggingface.co/ostris/zimage_turbo_training_adapter/resolve/main/zimage_turbo_training_adapter_v2.safetensors"
-            
-            echo "Z Image Turbo model download complete!"
-        ) > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
-        MODEL_DOWNLOAD_PID=$!
-        BACKGROUND_PIDS+=("$!")
         ;;
 esac
 
 echo ""
-
-# Start captioning processes if needed
-if [ "$CAPTION_MODE" != "skip" ]; then
-    print_header "Starting Captioning Process"
-    echo ""
-
-    # Clear any existing subfolders in dataset directories before captioning
-    if [ "$CAPTION_MODE" = "images" ] || [ "$CAPTION_MODE" = "both" ]; then
-        print_info "Cleaning up image dataset directory..."
-        # Remove any subdirectories but keep files
-        find "$NETWORK_VOLUME/image_dataset_here" -mindepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
-        print_success "Image dataset directory cleaned"
-    fi
-
-    if [ "$CAPTION_MODE" = "videos" ] || [ "$CAPTION_MODE" = "both" ]; then
-        print_info "Cleaning up video dataset directory..."
-        # Remove any subdirectories but keep files
-        find "$NETWORK_VOLUME/video_dataset_here" -mindepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
-        print_success "Video dataset directory cleaned"
-    fi
-
-    echo ""
-
-    # Start image captioning in background if needed
-    if [ "$CAPTION_MODE" = "images" ] || [ "$CAPTION_MODE" = "both" ]; then
-        print_info "Starting image captioning process..."
-        JOY_CAPTION_SCRIPT="$NETWORK_VOLUME/Captioning/JoyCaption/JoyCaptionRunner.sh"
-
-        if [ -f "$JOY_CAPTION_SCRIPT" ]; then
-            if [ -n "$TRIGGER_WORD" ]; then
-                bash "$JOY_CAPTION_SCRIPT" --trigger-word "$TRIGGER_WORD" > "$NETWORK_VOLUME/logs/image_captioning.log" 2>&1 &
-            else
-                bash "$JOY_CAPTION_SCRIPT" > "$NETWORK_VOLUME/logs/image_captioning.log" 2>&1 &
-            fi
-            IMAGE_CAPTION_PID=$!
-            BACKGROUND_PIDS+=("$!")
-            print_success "Image captioning started in background (PID: $IMAGE_CAPTION_PID)"
-
-            # Wait for image captioning with live log output
-            print_info "Waiting for image captioning to complete... initial run can take 5-20 minutes."
-            if ! wait_with_log "$IMAGE_CAPTION_PID" "$NETWORK_VOLUME/logs/image_captioning.log" \
-                    "Image captioning" 3600 \
-                    "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)" \
-                    "All done!"; then
-                exit 1
-            fi
-            print_success "Image captioning completed!"
-        else
-            print_error "JoyCaption script not found at: $JOY_CAPTION_SCRIPT"
-            exit 1
-        fi
-    fi
-
-    # Start video captioning if needed
-    if [ "$CAPTION_MODE" = "videos" ] || [ "$CAPTION_MODE" = "both" ]; then
-        print_info "Starting video captioning process..."
-        VIDEO_CAPTION_SCRIPT="$NETWORK_VOLUME/Captioning/video_captioner.sh"
-
-        if [ -f "$VIDEO_CAPTION_SCRIPT" ]; then
-            bash "$VIDEO_CAPTION_SCRIPT" > "$NETWORK_VOLUME/logs/video_captioning.log" 2>&1 &
-            VIDEO_CAPTION_PID=$!
-            BACKGROUND_PIDS+=("$!")
-
-            # Wait for video captioning with live log output
-            print_info "Waiting for video captioning to complete..."
-            if ! wait_with_log "$VIDEO_CAPTION_PID" "$NETWORK_VOLUME/logs/video_captioning.log" \
-                    "Video captioning" 7200 \
-                    "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)" \
-                    "video captioning complete"; then
-                exit 1
-            fi
-            print_success "Video captioning completed successfully"
-        else
-            print_error "Video captioning script not found at: $VIDEO_CAPTION_SCRIPT"
-            exit 1
-        fi
-    fi
-
-    echo ""
-fi
-
-# Wait for model download to complete
-if [ -n "$MODEL_DOWNLOAD_PID" ]; then
-    print_header "Finalizing Model Download"
-    echo ""
-    print_info "Waiting for model download to complete..."
-    echo ""
-    if ! wait_with_log "$MODEL_DOWNLOAD_PID" "$NETWORK_VOLUME/logs/model_download.log" \
-            "Model download" 10800 "(^ERROR|^fatal:|HTTP.*40[134]|unauthorized|Download failed|Permission denied)"; then
-        exit 1
-    fi
-    
-    # Verify model files actually exist based on MODEL_TYPE
-    print_info "Verifying model download..."
-    case $MODEL_TYPE in
-        "flux")
-            if [ ! -f "$NETWORK_VOLUME/models/flux/flux1-dev.safetensors" ] && [ ! -d "$NETWORK_VOLUME/models/flux" ]; then
-                print_error "Flux model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
-                exit 1
-            fi
-            ;;
-        "sdxl")
-            if [ ! -f "$NETWORK_VOLUME/models/sdXL_v10VAEFix.safetensors" ]; then
-                print_error "SDXL model file not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
-                exit 1
-            fi
-            ;;
-        "wan13")
-            if [ ! -d "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" 2>/dev/null)" ]; then
-                print_error "Wan 1.3B model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
-                exit 1
-            fi
-            ;;
-        "wan14b_t2v")
-            if [ ! -d "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" 2>/dev/null)" ]; then
-                print_error "Wan 14B T2V model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
-                exit 1
-            fi
-            ;;
-        "wan14b_i2v")
-            if [ ! -d "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" 2>/dev/null)" ]; then
-                print_error "Wan 14B I2V model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
-                exit 1
-            fi
-            ;;
-        "qwen")
-            if [ ! -d "$NETWORK_VOLUME/models/Qwen-Image-2512" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Qwen-Image-2512" 2>/dev/null)" ]; then
-                print_error "Qwen Image 2512 model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
-                exit 1
-            fi
-            ;;
-        "z_image_turbo")
-            missing_files=""
-            if [ ! -f "$NETWORK_VOLUME/models/z_image/z_image_turbo_bf16.safetensors" ]; then
-                missing_files="$missing_files z_image_turbo_bf16.safetensors"
-            fi
-            if [ ! -f "$NETWORK_VOLUME/models/z_image/ae.safetensors" ]; then
-                missing_files="$missing_files ae.safetensors"
-            fi
-            if [ ! -f "$NETWORK_VOLUME/models/z_image/qwen_3_4b.safetensors" ]; then
-                missing_files="$missing_files qwen_3_4b.safetensors"
-            fi
-            if [ ! -f "$NETWORK_VOLUME/models/z_image/zimage_turbo_training_adapter_v2.safetensors" ]; then
-                missing_files="$missing_files zimage_turbo_training_adapter_v2.safetensors"
-            fi
-            if [ -n "$missing_files" ]; then
-                print_error "Z Image Turbo model files missing after download:$missing_files"
-                print_error "Check log: $NETWORK_VOLUME/logs/model_download.log"
-                exit 1
-            fi
-            ;;
-    esac
-    print_success "Model download completed and verified!"
-    echo ""
-fi
 
 # Update dataset.toml file with actual paths and video config
 print_header "Configuring Dataset"
@@ -979,6 +687,264 @@ while true; do
 done
 
 echo ""
+print_info "Configuration completed! Starting model download and setup..."
+echo ""
+
+# Model download logic - start in background
+print_header "Starting Model Download"
+echo ""
+
+mkdir -p "$NETWORK_VOLUME/models"
+
+# Initialize MODEL_DOWNLOAD_PID to ensure it's always set
+MODEL_DOWNLOAD_PID=""
+
+case $MODEL_TYPE in
+    "flux")
+        if [ -z "$HUGGING_FACE_TOKEN" ] || [ "$HUGGING_FACE_TOKEN" = "token_here" ]; then
+            print_error "HUGGING_FACE_TOKEN is not set properly."
+            exit 1
+        fi
+
+        print_info "HUGGING_FACE_TOKEN is set."
+        check_disk_space "$NETWORK_VOLUME" 30 "Flux model"
+        print_info "Starting Flux model download in background..."
+        mkdir -p "$NETWORK_VOLUME/models/flux"
+        hf download black-forest-labs/FLUX.1-dev --local-dir "$NETWORK_VOLUME/models/flux" --repo-type model --token "$HUGGING_FACE_TOKEN" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
+        ;;
+
+    "sdxl")
+        check_disk_space "$NETWORK_VOLUME" 7 "SDXL model"
+        print_info "Starting Base SDXL model download in background..."
+        hf download timoshishi/sdXL_v10VAEFix sdXL_v10VAEFix.safetensors --local-dir "$NETWORK_VOLUME/models/" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
+        ;;
+
+    "wan13")
+        check_disk_space "$NETWORK_VOLUME" 5 "Wan 1.3B model"
+        print_info "Starting Wan 1.3B model download in background..."
+        mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B"
+        hf download Wan-AI/Wan2.1-T2V-1.3B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
+        ;;
+
+    "wan14b_t2v")
+        check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B T2V model"
+        print_info "Starting Wan 14B T2V model download in background..."
+        mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B"
+        hf download Wan-AI/Wan2.1-T2V-14B --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
+        ;;
+
+    "wan14b_i2v")
+        check_disk_space "$NETWORK_VOLUME" 30 "Wan 14B I2V model"
+        print_info "Starting Wan 14B I2V model download in background..."
+        mkdir -p "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P"
+        hf download Wan-AI/Wan2.1-I2V-14B-480P --local-dir "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
+        ;;
+
+    "qwen")
+        check_disk_space "$NETWORK_VOLUME" 15 "Qwen Image 2512 model"
+        print_info "Starting Qwen Image 2512 model download in background..."
+        mkdir -p "$NETWORK_VOLUME/models/Qwen-Image-2512"
+        hf download Qwen/Qwen-Image-2512 --local-dir "$NETWORK_VOLUME/models/Qwen-Image-2512" > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
+        ;;
+
+    "z_image_turbo")
+        check_disk_space "$NETWORK_VOLUME" 15 "Z Image Turbo model"
+        print_info "Starting Z Image Turbo model download in background..."
+        mkdir -p "$NETWORK_VOLUME/models/z_image"
+        # Download model files using hf download and move to expected location
+        (
+            echo "Downloading Z Image Turbo models from HuggingFace..."
+            # Download main model files (diffusion model, VAE, text encoder)
+            hf download Comfy-Org/z_image_turbo --local-dir "$NETWORK_VOLUME/models/z_image_turbo_temp"
+            
+            echo "Moving model files to final location..."
+            # Move files to the expected location
+            mv "$NETWORK_VOLUME/models/z_image_turbo_temp/split_files/diffusion_models/z_image_turbo_bf16.safetensors" "$NETWORK_VOLUME/models/z_image/"
+            mv "$NETWORK_VOLUME/models/z_image_turbo_temp/split_files/vae/ae.safetensors" "$NETWORK_VOLUME/models/z_image/"
+            mv "$NETWORK_VOLUME/models/z_image_turbo_temp/split_files/text_encoders/qwen_3_4b.safetensors" "$NETWORK_VOLUME/models/z_image/"
+            
+            # Clean up temp directory
+            rm -rf "$NETWORK_VOLUME/models/z_image_turbo_temp"
+            
+            echo "Downloading Z Image Turbo training adapter..."
+            wget -q --show-progress -O "$NETWORK_VOLUME/models/z_image/zimage_turbo_training_adapter_v2.safetensors" \
+                "https://huggingface.co/ostris/zimage_turbo_training_adapter/resolve/main/zimage_turbo_training_adapter_v2.safetensors"
+            
+            echo "Z Image Turbo model download complete!"
+        ) > "$NETWORK_VOLUME/logs/model_download.log" 2>&1 &
+        MODEL_DOWNLOAD_PID=$!
+        BACKGROUND_PIDS+=("$!")
+        ;;
+esac
+
+echo ""
+
+# Start captioning processes if needed
+if [ "$CAPTION_MODE" != "skip" ]; then
+    print_header "Starting Captioning Process"
+    echo ""
+
+    # Clear any existing subfolders in dataset directories before captioning
+    if [ "$CAPTION_MODE" = "images" ] || [ "$CAPTION_MODE" = "both" ]; then
+        print_info "Cleaning up image dataset directory..."
+        # Remove any subdirectories but keep files
+        find "$NETWORK_VOLUME/image_dataset_here" -mindepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
+        print_success "Image dataset directory cleaned"
+    fi
+
+    if [ "$CAPTION_MODE" = "videos" ] || [ "$CAPTION_MODE" = "both" ]; then
+        print_info "Cleaning up video dataset directory..."
+        # Remove any subdirectories but keep files
+        find "$NETWORK_VOLUME/video_dataset_here" -mindepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
+        print_success "Video dataset directory cleaned"
+    fi
+
+    echo ""
+
+    # Start image captioning in background if needed
+    if [ "$CAPTION_MODE" = "images" ] || [ "$CAPTION_MODE" = "both" ]; then
+        print_info "Starting image captioning process..."
+        JOY_CAPTION_SCRIPT="$NETWORK_VOLUME/Captioning/JoyCaption/JoyCaptionRunner.sh"
+
+        if [ -f "$JOY_CAPTION_SCRIPT" ]; then
+            if [ -n "$TRIGGER_WORD" ]; then
+                bash "$JOY_CAPTION_SCRIPT" --trigger-word "$TRIGGER_WORD" > "$NETWORK_VOLUME/logs/image_captioning.log" 2>&1 &
+            else
+                bash "$JOY_CAPTION_SCRIPT" > "$NETWORK_VOLUME/logs/image_captioning.log" 2>&1 &
+            fi
+            IMAGE_CAPTION_PID=$!
+            BACKGROUND_PIDS+=("$!")
+            print_success "Image captioning started in background (PID: $IMAGE_CAPTION_PID)"
+
+            # Wait for image captioning with live log output
+            print_info "Waiting for image captioning to complete... initial run can take 5-20 minutes."
+            if ! wait_with_log "$IMAGE_CAPTION_PID" "$NETWORK_VOLUME/logs/image_captioning.log" \
+                    "Image captioning" 3600 \
+                    "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)" \
+                    "All done!"; then
+                exit 1
+            fi
+            print_success "Image captioning completed!"
+        else
+            print_error "JoyCaption script not found at: $JOY_CAPTION_SCRIPT"
+            exit 1
+        fi
+    fi
+
+    # Start video captioning if needed
+    if [ "$CAPTION_MODE" = "videos" ] || [ "$CAPTION_MODE" = "both" ]; then
+        print_info "Starting video captioning process..."
+        VIDEO_CAPTION_SCRIPT="$NETWORK_VOLUME/Captioning/video_captioner.sh"
+
+        if [ -f "$VIDEO_CAPTION_SCRIPT" ]; then
+            bash "$VIDEO_CAPTION_SCRIPT" > "$NETWORK_VOLUME/logs/video_captioning.log" 2>&1 &
+            VIDEO_CAPTION_PID=$!
+            BACKGROUND_PIDS+=("$!")
+
+            # Wait for video captioning with live log output
+            print_info "Waiting for video captioning to complete..."
+            if ! wait_with_log "$VIDEO_CAPTION_PID" "$NETWORK_VOLUME/logs/video_captioning.log" \
+                    "Video captioning" 7200 \
+                    "(^\[ERROR\]|^Error:|^Traceback|Exception:|failed with exit)" \
+                    "video captioning complete"; then
+                exit 1
+            fi
+            print_success "Video captioning completed successfully"
+        else
+            print_error "Video captioning script not found at: $VIDEO_CAPTION_SCRIPT"
+            exit 1
+        fi
+    fi
+
+    echo ""
+fi
+
+# Wait for model download to complete
+if [ -n "$MODEL_DOWNLOAD_PID" ]; then
+    print_header "Finalizing Model Download"
+    echo ""
+    print_info "Waiting for model download to complete..."
+    echo ""
+    if ! wait_with_log "$MODEL_DOWNLOAD_PID" "$NETWORK_VOLUME/logs/model_download.log" \
+            "Model download" 10800 "(^ERROR|^fatal:|HTTP.*40[134]|unauthorized|Download failed|Permission denied)"; then
+        exit 1
+    fi
+    
+    # Verify model files actually exist based on MODEL_TYPE
+    print_info "Verifying model download..."
+    case $MODEL_TYPE in
+        "flux")
+            if [ ! -f "$NETWORK_VOLUME/models/flux/flux1-dev.safetensors" ] && [ ! -d "$NETWORK_VOLUME/models/flux" ]; then
+                print_error "Flux model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
+                exit 1
+            fi
+            ;;
+        "sdxl")
+            if [ ! -f "$NETWORK_VOLUME/models/sdXL_v10VAEFix.safetensors" ]; then
+                print_error "SDXL model file not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
+                exit 1
+            fi
+            ;;
+        "wan13")
+            if [ ! -d "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-1.3B" 2>/dev/null)" ]; then
+                print_error "Wan 1.3B model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
+                exit 1
+            fi
+            ;;
+        "wan14b_t2v")
+            if [ ! -d "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Wan/Wan2.1-T2V-14B" 2>/dev/null)" ]; then
+                print_error "Wan 14B T2V model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
+                exit 1
+            fi
+            ;;
+        "wan14b_i2v")
+            if [ ! -d "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Wan/Wan2.1-I2V-14B-480P" 2>/dev/null)" ]; then
+                print_error "Wan 14B I2V model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
+                exit 1
+            fi
+            ;;
+        "qwen")
+            if [ ! -d "$NETWORK_VOLUME/models/Qwen-Image-2512" ] || [ -z "$(ls -A "$NETWORK_VOLUME/models/Qwen-Image-2512" 2>/dev/null)" ]; then
+                print_error "Qwen Image 2512 model files not found after download. Check log: $NETWORK_VOLUME/logs/model_download.log"
+                exit 1
+            fi
+            ;;
+        "z_image_turbo")
+            missing_files=""
+            if [ ! -f "$NETWORK_VOLUME/models/z_image/z_image_turbo_bf16.safetensors" ]; then
+                missing_files="$missing_files z_image_turbo_bf16.safetensors"
+            fi
+            if [ ! -f "$NETWORK_VOLUME/models/z_image/ae.safetensors" ]; then
+                missing_files="$missing_files ae.safetensors"
+            fi
+            if [ ! -f "$NETWORK_VOLUME/models/z_image/qwen_3_4b.safetensors" ]; then
+                missing_files="$missing_files qwen_3_4b.safetensors"
+            fi
+            if [ ! -f "$NETWORK_VOLUME/models/z_image/zimage_turbo_training_adapter_v2.safetensors" ]; then
+                missing_files="$missing_files zimage_turbo_training_adapter_v2.safetensors"
+            fi
+            if [ -n "$missing_files" ]; then
+                print_error "Z Image Turbo model files missing after download:$missing_files"
+                print_error "Check log: $NETWORK_VOLUME/logs/model_download.log"
+                exit 1
+            fi
+            ;;
+    esac
+    print_success "Model download completed and verified!"
+    echo ""
+fi
 
 # Check if image captioning is still running
 if [ "$CAPTION_MODE" = "images" ] || [ "$CAPTION_MODE" = "both" ]; then
