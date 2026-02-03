@@ -127,6 +127,24 @@ echo ""
 print_success "Selected model: $MODEL_NAME"
 echo ""
 
+# LoRA output name
+DEFAULT_LORA_NAME="${MODEL_TYPE}_lora"
+echo -e "${BOLD}Enter a name for your LoRA (or press Enter for default: $DEFAULT_LORA_NAME):${NC}"
+while true; do
+    read -p "> " LORA_NAME_INPUT
+    if [ -z "$LORA_NAME_INPUT" ]; then
+        LORA_NAME="$DEFAULT_LORA_NAME"
+        break
+    elif [[ "$LORA_NAME_INPUT" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        LORA_NAME="$LORA_NAME_INPUT"
+        break
+    else
+        print_error "Invalid name. Use only letters, numbers, underscores, and hyphens (no spaces)."
+    fi
+done
+print_success "LoRA name: $LORA_NAME"
+echo ""
+
 # Check and set required API keys
 if [ "$MODEL_TYPE" = "flux" ]; then
     if [ -z "$HUGGING_FACE_TOKEN" ] || [ "$HUGGING_FACE_TOKEN" = "token_here" ]; then
@@ -345,10 +363,10 @@ case $MODEL_TYPE in
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/flux.toml" ]; then
             print_info "flux.toml already exists in examples directory"
             # Update output_dir even if file already exists
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/flux_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/flux.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/flux.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/flux_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/flux.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved flux.toml to examples directory"
         else
@@ -371,10 +389,10 @@ case $MODEL_TYPE in
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml" ]; then
             print_info "sdxl.toml already exists in examples directory"
             # Update output_dir even if file already exists
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/sdxl_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/sdxl.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/sdxl_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/sdxl.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved sdxl.toml to examples directory"
         else
@@ -396,10 +414,10 @@ case $MODEL_TYPE in
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml" ]; then
             print_info "wan13_video.toml already exists in examples directory"
             # Update output_dir even if file already exists
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan13_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan13_video.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan13_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan13_video.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan13_video.toml to examples directory"
         else
@@ -422,10 +440,10 @@ case $MODEL_TYPE in
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml" ]; then
             print_info "wan14b_t2v.toml already exists in examples directory"
             # Update output_dir even if file already exists
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_t2v_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_t2v.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_t2v_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_t2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan14b_t2v.toml to examples directory"
         else
@@ -448,10 +466,10 @@ case $MODEL_TYPE in
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml" ]; then
             print_info "wan14b_i2v.toml already exists in examples directory"
             # Update output_dir even if file already exists
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_i2v_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/wan14b_i2v.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/wan14b_i2v_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/wan14b_i2v.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved wan14b_i2v.toml to examples directory"
         else
@@ -474,10 +492,10 @@ case $MODEL_TYPE in
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml" ]; then
             print_info "qwen_toml.toml already exists in examples directory"
             # Update output_dir even if file already exists
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/qwen_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/qwen_toml.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/qwen_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/qwen_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved qwen_toml.toml to examples directory"
         else
@@ -500,10 +518,10 @@ case $MODEL_TYPE in
         if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml" ]; then
             print_info "z_image_toml.toml already exists in examples directory"
             # Update output_dir even if file already exists
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/z_image_lora'|" "$NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/diffusion_pipe/examples/z_image_toml.toml"
         elif [ -f "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml" ]; then
             # Update output_dir before moving
-            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/z_image_lora'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml"
+            sed -i "s|^output_dir = .*|output_dir = '$NETWORK_VOLUME/output_folder/$LORA_NAME'|" "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml"
             mv "$NETWORK_VOLUME/runpod-lora-trainer/toml_files/z_image_toml.toml" "$NETWORK_VOLUME/diffusion_pipe/examples/"
             print_success "Moved z_image_toml.toml to examples directory"
         else
@@ -772,6 +790,7 @@ else
 fi
 
 echo -e "${BOLD}Model:${NC} $MODEL_NAME"
+echo -e "${BOLD}LoRA Name:${NC} $LORA_NAME"
 echo -e "${BOLD}TOML Config:${NC} examples/$TOML_FILE"
 # Only show resolution as WxH if it's a number, otherwise show as-is
 if [[ "$RESOLUTION" =~ ^[0-9]+$ ]]; then
@@ -909,6 +928,7 @@ while true; do
                         print_header "Updated Training Configuration"
                         echo ""
                         echo -e "${BOLD}Model:${NC} $MODEL_NAME"
+                        echo -e "${BOLD}LoRA Name:${NC} $LORA_NAME"
                         # Only show resolution as WxH if it's a number, otherwise show as-is
                         if [[ "$RESOLUTION" =~ ^[0-9]+$ ]]; then
                             echo -e "${BOLD}Resolution:${NC} ${RESOLUTION}x${RESOLUTION}"
@@ -1069,7 +1089,44 @@ print_warning "Training is starting. This may take several hours depending on yo
 print_info "You can monitor progress in the console output below."
 echo ""
 
+# Start background watcher to copy checkpoints with LoRA name as they save
+OUTPUT_DIR="$NETWORK_VOLUME/output_folder/$LORA_NAME"
+(
+    SEEN=""
+    while true; do
+        for epoch_dir in "$OUTPUT_DIR"/epoch*; do
+            [ -d "$epoch_dir" ] || continue
+            epoch_num="${epoch_dir##*epoch}"
+            src="$epoch_dir/adapter_model.safetensors"
+            dst="$OUTPUT_DIR/${LORA_NAME}_${epoch_num}.safetensors"
+            if [ -f "$src" ] && ! echo "$SEEN" | grep -qF "|$epoch_num|"; then
+                cp "$src" "$dst"
+                echo "[LoRA Watcher] Created ${LORA_NAME}_${epoch_num}.safetensors"
+                SEEN="${SEEN}|${epoch_num}|"
+            fi
+        done
+        sleep 30
+    done
+) &
+LORA_WATCHER_PID=$!
+BACKGROUND_PIDS+=("$LORA_WATCHER_PID")
+
 # Start training with the appropriate TOML file
 NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" deepspeed --num_gpus=1 train.py --deepspeed --config "examples/$TOML_FILE"
+
+# Stop the watcher
+kill "$LORA_WATCHER_PID" 2>/dev/null || true
+
+# Final pass to catch any checkpoints saved right before training ended
+for epoch_dir in "$OUTPUT_DIR"/epoch*; do
+    [ -d "$epoch_dir" ] || continue
+    epoch_num="${epoch_dir##*epoch}"
+    src="$epoch_dir/adapter_model.safetensors"
+    dst="$OUTPUT_DIR/${LORA_NAME}_${epoch_num}.safetensors"
+    if [ -f "$src" ] && [ ! -f "$dst" ]; then
+        cp "$src" "$dst"
+        print_info "Created ${LORA_NAME}_${epoch_num}.safetensors"
+    fi
+done
 
 print_success "Training completed!"

@@ -211,10 +211,61 @@ wait_with_log() {
 ########################################
 # Disk space pre-flight check
 ########################################
+
+# Query the RunPod API for the pod's allocated volume size.
+# Caches the result so subsequent calls don't repeat the API request.
+_get_runpod_volume_gb() {
+    # Return cached value if available
+    if [ -n "$_RUNPOD_VOLUME_GB_CACHE" ]; then
+        echo "$_RUNPOD_VOLUME_GB_CACHE"
+        return 0
+    fi
+
+    if [ -z "$RUNPOD_API_KEY" ] || [ -z "$RUNPOD_POD_ID" ]; then
+        return 1
+    fi
+
+    local response
+    response=$(curl -s --max-time 5 \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $RUNPOD_API_KEY" \
+        --data '{"query": "{ pod(input: {podId: \"'"$RUNPOD_POD_ID"'\"}) { volumeInGb } }"}' \
+        https://api.runpod.io/graphql 2>/dev/null)
+
+    local volume_gb
+    volume_gb=$(echo "$response" | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['pod']['volumeInGb'])" 2>/dev/null)
+
+    if [ -n "$volume_gb" ] && [ "$volume_gb" -gt 0 ] 2>/dev/null; then
+        export _RUNPOD_VOLUME_GB_CACHE="$volume_gb"
+        echo "$volume_gb"
+        return 0
+    fi
+    return 1
+}
+
 check_disk_space() {
     local path="$1" required_gb="$2" label="${3:-download}"
     local available_gb
-    available_gb=$(df -BG "$path" 2>/dev/null | awk 'NR==2 {gsub(/G/,"",$4); print $4}')
+
+    # Try RunPod API first to get the pod's actual allocated volume size
+    local volume_gb
+    if volume_gb=$(_get_runpod_volume_gb); then
+        # Calculate used space on the volume mount
+        local mount_path="/workspace"
+        [ -d "$mount_path" ] || mount_path="/"
+        local used_gb
+        used_gb=$(du -s --block-size=1G "$mount_path" 2>/dev/null | awk '{print $1}')
+        if [ -n "$used_gb" ] 2>/dev/null; then
+            available_gb=$((volume_gb - used_gb))
+            [ "$available_gb" -lt 0 ] && available_gb=0
+        fi
+    fi
+
+    # Fall back to df if API approach didn't work
+    if [ -z "$available_gb" ]; then
+        available_gb=$(df -BG "$path" 2>/dev/null | awk 'NR==2 {gsub(/G/,"",$4); print $4}')
+    fi
+
     if [ -z "$available_gb" ]; then
         print_warning "Could not determine available disk space at $path — skipping check for $label"
         return 0
