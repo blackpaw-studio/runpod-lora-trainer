@@ -1064,12 +1064,16 @@ while true; do
     for epoch_dir in "\$OUTPUT_DIR"/*/epoch*; do
         test -d "\$epoch_dir" || continue
         epoch_num=\$(echo "\$epoch_dir" | grep -o '[0-9]*$')
-        src="\$epoch_dir/adapter_model.safetensors"
         dst="\$OUTPUT_DIR/\${LORA_NAME}_\${epoch_num}.safetensors"
-        if test -f "\$src" && test ! -f "\$dst"; then
-            cp "\$src" "\$dst"
-            echo "[LoRA Watcher] Created \${LORA_NAME}_\${epoch_num}.safetensors"
-        fi
+        test -f "\$dst" && continue
+        for candidate in adapter_model.safetensors lora.safetensors; do
+            src="\$epoch_dir/\$candidate"
+            if test -f "\$src"; then
+                cp "\$src" "\$dst"
+                echo "[LoRA Watcher] Created \${LORA_NAME}_\${epoch_num}.safetensors (from \$candidate)"
+                break
+            fi
+        done
     done
     sleep 30
 done
@@ -1089,12 +1093,16 @@ kill "$LORA_WATCHER_PID" 2>/dev/null || true
 for epoch_dir in "$OUTPUT_DIR"/*/epoch*; do
     [ -d "$epoch_dir" ] || continue
     epoch_num=$(echo "$epoch_dir" | grep -o '[0-9]*$')
-    src="$epoch_dir/adapter_model.safetensors"
     dst="$OUTPUT_DIR/${LORA_NAME}_${epoch_num}.safetensors"
-    if [ -f "$src" ] && [ ! -f "$dst" ]; then
-        cp "$src" "$dst"
-        print_info "Created ${LORA_NAME}_${epoch_num}.safetensors"
-    fi
+    [ -f "$dst" ] && continue
+    for candidate in adapter_model.safetensors lora.safetensors; do
+        src="$epoch_dir/$candidate"
+        if [ -f "$src" ] && [ ! -f "$dst" ]; then
+            cp "$src" "$dst"
+            print_info "Created ${LORA_NAME}_${epoch_num}.safetensors (from $candidate)"
+            break
+        fi
+    done
 done
 
 # Create zip of all named LoRA files
