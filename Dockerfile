@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-   python3 python3-pip python3-venv curl git git-lfs wget libgl1 libglib2.0-0 \
+   python3 python3-pip python3-venv curl git git-lfs wget libgl1 libglib2.0-0 zip \
    python3-dev build-essential gcc \
    cuda-nvcc-12-8 cuda-cudart-dev-12-8 \
    && ln -sf /usr/bin/python3 /usr/bin/python \
