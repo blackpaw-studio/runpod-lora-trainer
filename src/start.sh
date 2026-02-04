@@ -313,7 +313,7 @@ if [ -f "$NETWORK_VOLUME/diffusion_pipe/examples/dataset.toml" ]; then
 fi
 
 echo "Checking for package updates..."
-pip install --no-deps --upgrade transformers "peft>=0.17.0" "huggingface_hub[cli]" -q
+pip install --upgrade transformers "peft>=0.17.0" "huggingface_hub[cli]" "torch==2.9.*" -q
 pip uninstall -y diffusers
 pip install git+https://github.com/huggingface/diffusers -q
 

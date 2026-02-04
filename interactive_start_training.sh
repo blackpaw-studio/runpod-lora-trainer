@@ -1020,7 +1020,7 @@ cd "$NETWORK_VOLUME/diffusion_pipe"
 
 print_info "Ensuring dependencies are up to date before training..."
 print_info "Upgrading transformers and peft packages..."
-pip install --no-deps -U transformers "peft>=0.17.0"
+pip install -U transformers "peft>=0.17.0" "torch==2.9.*"
 
 echo ""
 
