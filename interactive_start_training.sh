@@ -1050,6 +1050,7 @@ fi
 
 print_warning "Training is starting. This may take several hours depending on your dataset size and model."
 print_info "You can monitor progress in the console output below."
+print_info "Press Ctrl+C at any time to stop early — completed epochs will still be collected and zipped."
 echo ""
 
 # Start background watcher to copy checkpoints with LoRA name as they save
@@ -1083,8 +1084,16 @@ sh "$LORA_WATCHER_SCRIPT" > "$NETWORK_VOLUME/logs/lora_watcher.log" 2>&1 &
 LORA_WATCHER_PID=$!
 BACKGROUND_PIDS+=("$LORA_WATCHER_PID")
 
+# Override trap so Ctrl+C stops training but continues to cleanup/zip
+TRAINING_INTERRUPTED=false
+trap 'TRAINING_INTERRUPTED=true; echo ""; print_warning "Ctrl+C received — stopping training and collecting completed epochs..."' SIGINT
+
 # Start training with the appropriate TOML file
-NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" deepspeed --num_gpus=1 train.py --deepspeed --config "examples/$TOML_FILE"
+TRAINING_EXIT_CODE=0
+NCCL_P2P_DISABLE="1" NCCL_IB_DISABLE="1" deepspeed --num_gpus=1 train.py --deepspeed --config "examples/$TOML_FILE" || TRAINING_EXIT_CODE=$?
+
+# Restore default trap
+trap cleanup SIGINT SIGTERM
 
 # Stop the watcher
 kill "$LORA_WATCHER_PID" 2>/dev/null || true
@@ -1116,4 +1125,8 @@ else
     print_warning "No renamed LoRA files found to zip."
 fi
 
-print_success "Training completed!"
+if [ "$TRAINING_INTERRUPTED" = true ]; then
+    print_warning "Training was stopped early via Ctrl+C."
+else
+    print_success "Training completed!"
+fi
